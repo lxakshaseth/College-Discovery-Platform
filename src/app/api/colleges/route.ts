@@ -22,14 +22,14 @@ export async function GET(req: NextRequest) {
 
     if (q) {
       where.OR = [
-        { name: { contains: q, mode: "insensitive" } },
-        { location: { contains: q, mode: "insensitive" } },
-        { state: { contains: q, mode: "insensitive" } },
+        { name: { contains: q } },
+        { location: { contains: q } },
+        { state: { contains: q } },
       ];
     }
 
     if (state) {
-      where.state = { equals: state, mode: "insensitive" };
+      where.state = { equals: state };
     }
 
     if (type) {

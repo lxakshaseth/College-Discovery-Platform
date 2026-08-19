@@ -36,14 +36,14 @@ export default async function CollegesPage({ searchParams }: CollegesPageProps) 
 
   if (q) {
     where.OR = [
-      { name: { contains: q, mode: "insensitive" } },
-      { location: { contains: q, mode: "insensitive" } },
-      { state: { contains: q, mode: "insensitive" } },
+      { name: { contains: q } },
+      { location: { contains: q } },
+      { state: { contains: q } },
     ];
   }
 
   if (state && state !== "ALL") {
-    where.state = { equals: state, mode: "insensitive" };
+    where.state = { equals: state };
   }
 
   if (type && type !== ("ALL" as any)) {

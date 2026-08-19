@@ -46,7 +46,16 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(colleges);
+    const formattedColleges = colleges.map((c) => ({
+      ...c,
+      approvals: typeof c.approvals === "string" ? JSON.parse(c.approvals || "[]") : c.approvals,
+      placements: c.placements.map((p) => ({
+        ...p,
+        topRecruiters: typeof p.topRecruiters === "string" ? JSON.parse(p.topRecruiters || "[]") : p.topRecruiters,
+      })),
+    }));
+
+    return NextResponse.json(formattedColleges);
   } catch (error) {
     console.error("Compare error:", error);
     return NextResponse.json(

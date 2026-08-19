@@ -21,8 +21,9 @@ export async function GET() {
     // Populate college details for each saved comparison
     const populated = await Promise.all(
       savedComparisons.map(async (comp) => {
+        const idsArray: string[] = typeof comp.collegeIds === "string" ? JSON.parse(comp.collegeIds || "[]") : comp.collegeIds;
         const colleges = await prisma.college.findMany({
-          where: { id: { in: comp.collegeIds } },
+          where: { id: { in: idsArray } },
           select: {
             id: true,
             name: true,
@@ -37,6 +38,7 @@ export async function GET() {
         });
         return {
           ...comp,
+          collegeIds: idsArray,
           colleges,
         };
       })
@@ -73,11 +75,14 @@ export async function POST(req: NextRequest) {
       data: {
         userId,
         name,
-        collegeIds,
+        collegeIds: JSON.stringify(collegeIds),
       },
     });
 
-    return NextResponse.json(comparison, { status: 201 });
+    return NextResponse.json({
+      ...comparison,
+      collegeIds,
+    }, { status: 201 });
   } catch (error) {
     console.error("Save comparison error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

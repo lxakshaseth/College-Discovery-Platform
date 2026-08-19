@@ -171,11 +171,12 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
           <tr>
             <td className="p-4 font-semibold text-gray-700 bg-gray-50/50">Top Recruiters</td>
             {colleges.map((c) => {
-              const recruiters = c.placements[0]?.topRecruiters || [];
+              const rawRecruiters = c.placements[0]?.topRecruiters;
+              const recruiters: string[] = typeof rawRecruiters === "string" ? JSON.parse(rawRecruiters || "[]") : (rawRecruiters || []);
               return (
                 <td key={c.id} className="p-4 text-center border-l border-gray-200">
                   <div className="flex flex-wrap justify-center gap-1.5">
-                    {recruiters.map((r, i) => (
+                    {recruiters.map((r: string, i: number) => (
                       <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-medium">
                         {r}
                       </span>
@@ -199,17 +200,21 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
           {/* Approvals */}
           <tr>
             <td className="p-4 font-semibold text-gray-700 bg-gray-50/50">Approvals & Accreditations</td>
-            {colleges.map((c) => (
-              <td key={c.id} className="p-4 text-center border-l border-gray-200">
-                <div className="flex flex-wrap justify-center gap-1">
-                  {c.approvals.map((appr, idx) => (
-                    <Badge key={idx} variant="outline" className="text-[11px] bg-blue-50/50 border-blue-200 text-blue-700">
-                      {appr}
-                    </Badge>
-                  ))}
-                </div>
-              </td>
-            ))}
+            {colleges.map((c) => {
+              const rawApprovals = c.approvals;
+              const approvals: string[] = typeof rawApprovals === "string" ? JSON.parse(rawApprovals || "[]") : (rawApprovals || []);
+              return (
+                <td key={c.id} className="p-4 text-center border-l border-gray-200">
+                  <div className="flex flex-wrap justify-center gap-1">
+                    {approvals.map((appr: string, idx: number) => (
+                      <Badge key={idx} variant="outline" className="text-[11px] bg-blue-50/50 border-blue-200 text-blue-700">
+                        {appr}
+                      </Badge>
+                    ))}
+                  </div>
+                </td>
+              );
+            })}
           </tr>
         </tbody>
       </table>

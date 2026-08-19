@@ -3,21 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
-}
-
-enum CollegeType {
-  PUBLIC
-  PRIVATE
-  DEEMED
-}
-
-enum CourseType {
-  UG
-  PG
-  DIPLOMA
-  PHD
 }
 
 model User {
@@ -40,7 +27,7 @@ model College {
   description     String
   location        String
   state           String
-  type            CollegeType
+  type            String         // PUBLIC, PRIVATE, DEEMED
   establishedYear Int
   rating          Float          @default(0)
   minFees         Int
@@ -48,7 +35,7 @@ model College {
   imageUrl        String?
   logoUrl         String?
   website         String?
-  approvals       String[]
+  approvals       String         @default("[]") // JSON array string
   ranking         Int?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -65,13 +52,13 @@ model College {
 }
 
 model Course {
-  id        String     @id @default(cuid())
+  id        String   @id @default(cuid())
   collegeId String
   name      String
   duration  String
   fees      Int
-  type      CourseType
-  college   College    @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  type      String   // UG, PG, DIPLOMA, PHD
+  college   College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
 
   @@index([collegeId])
   @@index([collegeId, type])
@@ -85,7 +72,7 @@ model Placement {
   highestPackage Float
   medianPackage  Float
   placementRate  Float
-  topRecruiters  String[]
+  topRecruiters  String   @default("[]") // JSON array string
   college        College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
 
   @@index([collegeId])
@@ -121,7 +108,7 @@ model SavedComparison {
   id         String   @id @default(cuid())
   userId     String
   name       String
-  collegeIds String[]
+  collegeIds String   @default("[]") // JSON array string
   createdAt  DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

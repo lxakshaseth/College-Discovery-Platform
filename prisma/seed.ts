@@ -1,5 +1,8 @@
-import { PrismaClient, CollegeType, CourseType } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+
+const CollegeType = { PUBLIC: "PUBLIC", PRIVATE: "PRIVATE", DEEMED: "DEEMED" } as const;
+const CourseType = { UG: "UG", PG: "PG", DIPLOMA: "DIPLOMA", PHD: "PHD" } as const;
 
 const prisma = new PrismaClient();
 
@@ -384,13 +387,16 @@ async function main() {
         minFees: c.minFees,
         maxFees: c.maxFees,
         website: c.website,
-        approvals: c.approvals,
+        approvals: JSON.stringify(c.approvals || []),
         description: c.description,
         courses: {
           create: c.courses,
         },
         placements: {
-          create: c.placements,
+          create: c.placements.map((p) => ({
+            ...p,
+            topRecruiters: JSON.stringify(p.topRecruiters || []),
+          })),
         },
       },
     });
