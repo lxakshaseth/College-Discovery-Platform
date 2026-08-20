@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { CollegeFilters } from "@/components/college/CollegeFilters";
-import { CollegeCard } from "@/components/college/CollegeCard";
+import { CollegeListContainer } from "@/components/college/CollegeListContainer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Prisma } from "@prisma/client";
@@ -77,6 +77,7 @@ export default async function CollegesPage({ searchParams }: CollegesPageProps) 
         skip,
         take: limit,
         include: {
+          placements: { take: 1, orderBy: { year: "desc" } },
           _count: {
             select: { reviews: true, courses: true },
           },
@@ -107,13 +108,13 @@ export default async function CollegesPage({ searchParams }: CollegesPageProps) 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Explore Colleges & Universities
           </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            Found <span className="font-bold text-gray-900">{total}</span> colleges matching your query filter.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Found <span className="font-bold text-slate-900">{total}</span> colleges matching your query filter.
           </p>
         </div>
       </div>
@@ -127,13 +128,13 @@ export default async function CollegesPage({ searchParams }: CollegesPageProps) 
           </Suspense>
         </div>
 
-        {/* Colleges Results Grid */}
+        {/* Colleges Results Grid / Table View */}
         <div className="lg:col-span-3 space-y-8">
           {colleges.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center space-y-3">
-              <SlidersHorizontal className="h-10 w-10 text-gray-400 mx-auto" />
-              <h3 className="text-lg font-bold text-gray-900">No colleges matched your filters</h3>
-              <p className="text-sm text-gray-500 max-w-md mx-auto">
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center space-y-3">
+              <SlidersHorizontal className="h-10 w-10 text-slate-400 mx-auto" />
+              <h3 className="text-lg font-bold text-slate-900">No colleges matched your filters</h3>
+              <p className="text-sm text-slate-500 max-w-md mx-auto">
                 Try expanding your state search or clearing your minimum rating filter to see more options.
               </p>
               <Link href="/colleges">
@@ -143,11 +144,7 @@ export default async function CollegesPage({ searchParams }: CollegesPageProps) 
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {colleges.map((college) => (
-                <CollegeCard key={college.id} college={college} />
-              ))}
-            </div>
+            <CollegeListContainer colleges={colleges} total={total} />
           )}
 
           {/* Pagination Controls */}

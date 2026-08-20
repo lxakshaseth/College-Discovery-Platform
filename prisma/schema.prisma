@@ -18,6 +18,8 @@ model User {
   reviews          Review[]
   savedColleges    SavedCollege[]
   savedComparisons SavedComparison[]
+  questions        Question[]
+  answers          Answer[]
 }
 
 model College {
@@ -36,6 +38,8 @@ model College {
   logoUrl         String?
   website         String?
   approvals       String         @default("[]") // JSON array string
+  facilities      String         @default("[]") // JSON array string
+  examsAccepted   String         @default("[]") // JSON array string
   ranking         Int?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -43,6 +47,7 @@ model College {
   placements      Placement[]
   reviews         Review[]
   savedBy         SavedCollege[]
+  questions       Question[]
 
   @@index([name])
   @@index([state])
@@ -93,6 +98,37 @@ model Review {
   @@index([collegeId])
 }
 
+model Question {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  collegeId String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  college   College? @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers   Answer[]
+
+  @@index([collegeId])
+  @@index([userId])
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  questionId String
+  userId     String
+  content    String
+  upvotes    Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+  @@index([userId])
+}
+
 model SavedCollege {
   id        String   @id @default(cuid())
   userId    String
@@ -112,3 +148,4 @@ model SavedComparison {
   createdAt  DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+

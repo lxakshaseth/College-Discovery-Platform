@@ -15,6 +15,8 @@ async function main() {
   console.log("🌱 Starting seed script for 50+ Indian Colleges...");
 
   // Clean existing data
+  await prisma.answer.deleteMany();
+  await prisma.question.deleteMany();
   await prisma.review.deleteMany();
   await prisma.savedCollege.deleteMany();
   await prisma.savedComparison.deleteMany();
@@ -373,7 +375,27 @@ async function main() {
 
   console.log(`📦 Inserting ${fullList.length} total colleges with full course & placement schemas...`);
 
+  const sampleFacilities = [
+    "Wi-Fi Campus", "Central Library", "Boys & Girls Hostel",
+    "Sports Complex & Gymnasium", "Incubation & Startup Cell",
+    "Modern Computer Labs", "Cafeteria & Food Court", "Medical Center"
+  ];
+
+  const createdColleges = [];
+
   for (const c of fullList) {
+    const isIIT = c.name.includes("IIT");
+    const isNIT = c.name.includes("NIT");
+    const isBITS = c.name.includes("BITS");
+
+    const exams = isIIT
+      ? ["JEE Advanced", "GATE"]
+      : isNIT
+      ? ["JEE Main", "GATE"]
+      : isBITS
+      ? ["BITSAT", "GATE"]
+      : ["JEE Main", "State CET", "GATE", "CAT"];
+
     const createdCollege = await prisma.college.create({
       data: {
         name: c.name,
@@ -387,7 +409,9 @@ async function main() {
         minFees: c.minFees,
         maxFees: c.maxFees,
         website: c.website,
-        approvals: JSON.stringify(c.approvals || []),
+        approvals: JSON.stringify(c.approvals || ["AICTE", "UGC"]),
+        facilities: JSON.stringify(sampleFacilities),
+        examsAccepted: JSON.stringify(exams),
         description: c.description,
         courses: {
           create: c.courses,
@@ -400,6 +424,8 @@ async function main() {
         },
       },
     });
+
+    createdColleges.push(createdCollege);
 
     // Seed 2 reviews per college from our seed users
     await prisma.review.createMany({
@@ -420,6 +446,92 @@ async function main() {
         },
       ],
     });
+  }
+
+  // Seed sample Community Questions & Answers
+  console.log("💬 Seeding Community Q&A Discussions...");
+
+  const sampleQuestions = [
+    {
+      title: "How is the coding culture and competitive programming at IIT Bombay?",
+      content: "I am joining B.Tech CSE this year. What clubs and hackathons are best to get involved in early?",
+      collegeIdx: 0,
+      user: users[0],
+      answers: [
+        {
+          user: users[1],
+          content: "The coding culture at Web & Coding Club (WnCC) is top notch! There are regular Codeforces contests, ICPC mentorship sessions, and annual hackathons like Techfest.",
+          upvotes: 18,
+        },
+        {
+          user: users[2],
+          content: "Start practicing on LeetCode and participate in freshmen coding leagues during your first semester!",
+          upvotes: 9,
+        },
+      ],
+    },
+    {
+      title: "What is the average hostel fee and accommodation quality at BITS Pilani?",
+      content: "Are single rooms provided for freshmen or is it double sharing? How is the mess food quality?",
+      collegeIdx: 3,
+      user: users[1],
+      answers: [
+        {
+          user: users[3],
+          content: "Freshmen get double sharing rooms in dedicated freshers bhavans. From 3rd year onward, almost all students get single rooms. Mess food has 3-4 caterers to choose from.",
+          upvotes: 24,
+        },
+      ],
+    },
+    {
+      title: "Can I get CSE at NIT Trichy with a 99.2 percentile in JEE Main?",
+      content: "I am an Other State (OS) General category student. What are the safe closing ranks for Round 6 JoSAA?",
+      collegeIdx: 5,
+      user: users[2],
+      answers: [
+        {
+          user: users[0],
+          content: "With 99.2%ile your rank would be around 9,000-10,000. CSE closing rank for OS General is around 1,500-4,000. However, ECE, Instrumentation, and Mechanical are very realistic choices!",
+          upvotes: 14,
+        },
+      ],
+    },
+    {
+      title: "How is the placement scenario for M.Tech Data Science & AI?",
+      content: "Do product companies like Microsoft, Google, and Amazon allow M.Tech students to sit for SDE-1 and AI Engineer roles?",
+      collegeIdx: 1,
+      user: users[3],
+      answers: [
+        {
+          user: users[0],
+          content: "Yes! Almost 95% of top product companies open both B.Tech and M.Tech CSE/AI students for software engineering and machine learning roles with identical CTC packages.",
+          upvotes: 31,
+        },
+      ],
+    },
+  ];
+
+  for (const q of sampleQuestions) {
+    const targetCollege = createdColleges[q.collegeIdx] || createdColleges[0];
+    const createdQ = await prisma.question.create({
+      data: {
+        title: q.title,
+        content: q.content,
+        collegeId: targetCollege.id,
+        userId: q.user.id,
+      },
+    });
+
+    for (const ans of q.answers) {
+      await prisma.answer.create({
+        data: {
+          questionId: createdQ.id,
+          userId: ans.user.id,
+          content: ans.content,
+          upvotes: ans.upvotes,
+        },
+      });
+    }
   }
 
   console.log("✅ Seed dataset generated successfully!");

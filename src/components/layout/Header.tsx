@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { GraduationCap, Scale, Bookmark, Search, User, LogOut, Sparkles, Menu, X } from "lucide-react";
+import { GraduationCap, Scale, Bookmark, Search, User, LogOut, Sparkles, Menu, X, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCompare } from "@/components/providers/CompareContext";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ export function Header() {
     { name: "Explore Colleges", href: "/colleges", icon: Search },
     { name: "Compare", href: "/compare", icon: Scale, badge: compareList.length },
     { name: "Rank Predictor", href: "/predictor", icon: Sparkles, highlight: true },
+    { name: "Community Q&A", href: "/discussions", icon: MessageSquare },
     { name: "Saved", href: "/saved", icon: Bookmark },
   ];
 

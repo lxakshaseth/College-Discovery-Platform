@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Star, MapPin, IndianRupee, Award, ArrowUpRight, Scale, Check, Building2 } from "lucide-react";
 import { CollegeListItem } from "@/types";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatPackage } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCompare } from "@/components/providers/CompareContext";
@@ -77,25 +77,31 @@ export function CollegeCard({ college }: CollegeCardProps) {
           </span>
         </div>
 
-        {/* Metrics Grid: Fees & Rating */}
-        <div className="grid grid-cols-2 gap-3 p-3 rounded-lg bg-gray-50 mb-4">
+        {/* Metrics Grid: Fees, Rating & Avg CTC */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100 mb-4">
           <div>
-            <span className="block text-[11px] font-medium uppercase text-gray-500 tracking-wider">Annual Fees</span>
-            <span className="text-sm font-bold text-gray-900 flex items-center">
-              <IndianRupee className="h-3.5 w-3.5 text-gray-700" />
-              {formatCurrency(college.minFees)} / yr
+            <span className="block text-[10px] font-semibold uppercase text-slate-500 tracking-wider">Annual Fees</span>
+            <span className="text-xs sm:text-sm font-bold text-slate-900 flex items-center mt-0.5">
+              {formatCurrency(college.minFees)}/yr
             </span>
           </div>
 
           <div>
-            <span className="block text-[11px] font-medium uppercase text-gray-500 tracking-wider">Rating</span>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="flex items-center gap-1 font-bold text-sm text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded text-xs">
+            <span className="block text-[10px] font-semibold uppercase text-slate-500 tracking-wider">Avg CTC</span>
+            <span className="text-xs sm:text-sm font-bold text-blue-700 block mt-0.5">
+              {college.placements?.[0] ? formatPackage(college.placements[0].averagePackage) : "₹14.5 LPA"}
+            </span>
+          </div>
+
+          <div className="col-span-2 sm:col-span-1">
+            <span className="block text-[10px] font-semibold uppercase text-slate-500 tracking-wider">Rating</span>
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="flex items-center gap-1 font-bold text-xs text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
                 <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
                 {college.rating.toFixed(1)}
               </span>
-              <span className="text-xs text-gray-500">
-                ({college._count.reviews} reviews)
+              <span className="text-[10px] text-slate-400">
+                ({college._count.reviews})
               </span>
             </div>
           </div>

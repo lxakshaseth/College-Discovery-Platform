@@ -11,6 +11,7 @@ export type CollegeWithRelations = College & {
 };
 
 export type CollegeListItem = College & {
+  placements?: Placement[];
   _count: {
     reviews: number;
     courses: number;

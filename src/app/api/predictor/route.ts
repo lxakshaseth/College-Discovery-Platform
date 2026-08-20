@@ -6,44 +6,54 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const exam = searchParams.get("exam") || "JEE Main";
     const rank = parseInt(searchParams.get("rank") || "10000");
+    const category = searchParams.get("category") || "GENERAL";
+    const homeState = searchParams.get("homeState") || "";
 
     if (isNaN(rank) || rank <= 0) {
       return NextResponse.json({ error: "Valid positive rank is required" }, { status: 400 });
     }
 
-    // Dynamic rank tier matching based on NIRF ranking & college type
-    // Top rank (<2500): Top IITs & NITs
-    // Mid rank (2500 - 15000): Mid IITs, Top NITs, Top IIITs, BITS
-    // Moderate rank (15000 - 50000): Mid NITs, Top Private (VIT, SRM, Thapar)
-    // High rank (>50000): Deemed/Private Universities
-    let whereClause = {};
+    // Category multiplier factor (e.g. OBC/EWS/SC/ST have effectively higher opening rank thresholds)
+    let categoryMultiplier = 1.0;
+    if (category === "OBC_NCL" || category === "EWS") categoryMultiplier = 1.25;
+    if (category === "SC") categoryMultiplier = 1.8;
+    if (category === "ST") categoryMultiplier = 2.4;
+
+    const adjustedRank = Math.round(rank / categoryMultiplier);
+
+    let whereClause: any = {};
 
     if (exam === "JEE Advanced") {
-      if (rank <= 3000) {
-        whereClause = { ranking: { lte: 10 }, type: "PUBLIC" };
-      } else if (rank <= 10000) {
-        whereClause = { type: "PUBLIC", name: { contains: "IIT" } };
-      } else {
-        whereClause = { type: "PUBLIC" };
-      }
-    } else if (exam === "JEE Main") {
-      if (rank <= 5000) {
-        whereClause = { ranking: { lte: 15 } };
-      } else if (rank <= 25000) {
-        whereClause = { OR: [{ type: "PUBLIC" }, { name: { contains: "NIT" } }, { name: { contains: "IIIT" } }] };
-      } else if (rank <= 75000) {
-        whereClause = { minFees: { lte: 400000 } };
-      } else {
-        whereClause = {};
-      }
+      whereClause = {
+        OR: [
+          { name: { contains: "IIT" } },
+          { type: "PUBLIC", ranking: { lte: 20 } },
+        ],
+      };
+    } else if (exam === "BITSAT") {
+      whereClause = {
+        OR: [
+          { name: { contains: "BITS" } },
+          { type: { in: ["PRIVATE", "DEEMED"] } },
+        ],
+      };
+    } else if (exam === "GATE") {
+      whereClause = {
+        courses: { some: { type: "PG" } },
+      };
+    } else if (exam === "CAT") {
+      whereClause = {
+        courses: { some: { name: { contains: "MBA" } } },
+      };
     } else {
+      // JEE Main
       whereClause = {};
     }
 
     const colleges = await prisma.college.findMany({
       where: whereClause,
-      take: 12,
-      orderBy: { rating: "desc" },
+      take: 24,
+      orderBy: { ranking: "asc" },
       include: {
         courses: { take: 3 },
         placements: { take: 1, orderBy: { year: "desc" } },
@@ -53,11 +63,13 @@ export async function GET(req: NextRequest) {
 
     const results = colleges.map((college) => {
       let admissionChance: "HIGH" | "MEDIUM" | "LOW" = "MEDIUM";
-      const collegeRankEst = (college.ranking || 30) * 800;
+      const baseEstimate = (college.ranking || 25) * 850;
+      const isHomeState = homeState && college.state.toLowerCase() === homeState.toLowerCase();
+      const cutoffEstimate = Math.round(baseEstimate * (isHomeState ? 1.3 : 1.0) * categoryMultiplier);
 
-      if (rank <= collegeRankEst * 0.8) {
+      if (rank <= cutoffEstimate * 0.75) {
         admissionChance = "HIGH";
-      } else if (rank <= collegeRankEst * 1.3) {
+      } else if (rank <= cutoffEstimate * 1.2) {
         admissionChance = "MEDIUM";
       } else {
         admissionChance = "LOW";
@@ -68,7 +80,9 @@ export async function GET(req: NextRequest) {
         matchDetails: {
           exam,
           userRank: rank,
-          cutoffEstimate: Math.round(collegeRankEst * 1.1),
+          category,
+          isHomeState,
+          cutoffEstimate,
           admissionChance,
         },
       };
@@ -77,6 +91,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       exam,
       userRank: rank,
+      category,
       totalRecommendations: results.length,
       recommendations: results,
     });

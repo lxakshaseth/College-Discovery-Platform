@@ -32,7 +32,17 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
           },
           orderBy: { createdAt: "desc" },
         },
-        _count: { select: { reviews: true, savedBy: true } },
+        questions: {
+          include: {
+            user: { select: { id: true, name: true, image: true } },
+            answers: {
+              include: { user: { select: { id: true, name: true, image: true } } },
+              orderBy: { upvotes: "desc" },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+        _count: { select: { reviews: true, savedBy: true, questions: true } },
       },
     });
   } catch (e) {
@@ -45,6 +55,8 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
 
   const latestPlacement = college.placements[0];
   const approvals: string[] = safeJsonParse<string[]>(college.approvals, []);
+  const facilities: string[] = safeJsonParse<string[]>(college.facilities, []);
+  const examsAccepted: string[] = safeJsonParse<string[]>(college.examsAccepted, []);
   const topRecruiters: string[] = latestPlacement
     ? safeJsonParse<string[]>(latestPlacement.topRecruiters, [])
     : [];
@@ -154,7 +166,7 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
 
       {/* Tabs Navigation for Deep Features */}
       <Tabs defaultValue="overview" className="w-full space-y-6">
-        <TabsList className="w-full sm:w-auto bg-white border border-gray-200 p-1.5 rounded-xl h-auto flex flex-wrap gap-1">
+        <TabsList className="w-full sm:w-auto bg-white border border-slate-200 p-1.5 rounded-xl h-auto flex flex-wrap gap-1">
           <TabsTrigger value="overview" className="px-5 py-2.5 text-sm font-semibold rounded-lg">
             Overview
           </TabsTrigger>
@@ -167,44 +179,86 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
           <TabsTrigger value="reviews" className="px-5 py-2.5 text-sm font-semibold rounded-lg">
             Reviews ({college._count.reviews})
           </TabsTrigger>
+          <TabsTrigger value="discussions" className="px-5 py-2.5 text-sm font-semibold rounded-lg">
+            Q&A Forum ({college.questions?.length || 0})
+          </TabsTrigger>
         </TabsList>
 
         {/* Tab 1: Overview */}
         <TabsContent value="overview" className="space-y-6">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm space-y-4">
-            <h3 className="text-xl font-bold text-gray-900">About {college.name}</h3>
-            <p className="text-gray-700 leading-relaxed font-normal">{college.description}</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm space-y-6">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">About {college.name}</h3>
+              <p className="text-slate-700 leading-relaxed font-normal">{college.description}</p>
+            </div>
+
+            {/* Accepted Entrance Exams */}
+            {examsAccepted.length > 0 && (
+              <div className="rounded-xl bg-slate-50 p-5 border border-slate-200 space-y-3">
+                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Entrance Exams Accepted for Admissions
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {examsAccepted.map((exam: string, idx: number) => (
+                    <Badge key={idx} variant="default" className="bg-blue-600 text-white font-semibold text-xs px-3 py-1">
+                      {exam}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Campus Facilities & Infrastructure */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Campus Amenities & Facilities
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {(facilities.length > 0 ? facilities : [
+                  "Wi-Fi Campus", "Central Library", "Hostels", "Sports Complex",
+                  "Incubation Cell", "Computer Labs", "Cafeteria", "Medical Center"
+                ]).map((fac: string, idx: number) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800"
+                  >
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>{fac}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </TabsContent>
 
         {/* Tab 2: Courses */}
         <TabsContent value="courses">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4 overflow-x-auto">
-            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 overflow-x-auto">
+            <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-blue-600" />
-              Offered Academic Programs
+              Offered Academic Programs & Tuition
             </h3>
 
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50 text-xs uppercase font-bold text-gray-500 tracking-wider">
+                <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase font-bold text-slate-500 tracking-wider">
                   <th className="p-3.5">Course Name</th>
                   <th className="p-3.5">Degree Level</th>
                   <th className="p-3.5">Duration</th>
                   <th className="p-3.5">Annual Tuition Fees</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 text-sm">
+              <tbody className="divide-y divide-slate-100 text-sm">
                 {college.courses?.map((course: any) => (
                   <tr key={course.id} className="hover:bg-blue-50/40 transition">
-                    <td className="p-3.5 font-bold text-gray-900">{course.name}</td>
+                    <td className="p-3.5 font-bold text-slate-900">{course.name}</td>
                     <td className="p-3.5">
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs font-semibold">
                         {course.type}
                       </Badge>
                     </td>
-                    <td className="p-3.5 text-gray-600">{course.duration}</td>
-                    <td className="p-3.5 font-bold text-gray-900">{formatCurrency(course.fees)} / yr</td>
+                    <td className="p-3.5 text-slate-600">{course.duration}</td>
+                    <td className="p-3.5 font-bold text-slate-900">{formatCurrency(course.fees)} / yr</td>
                   </tr>
                 ))}
               </tbody>
@@ -214,10 +268,10 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
 
         {/* Tab 3: Placements */}
         <TabsContent value="placements">
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm space-y-6">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm space-y-6">
+            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-blue-600" />
-              Campus Placement Statistics
+              Campus Placement Statistics & Records
             </h3>
 
             {latestPlacement ? (
@@ -246,12 +300,12 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
                 </div>
 
                 <div>
-                  <h4 className="font-bold text-sm text-gray-900 mb-3">Top Corporate Recruiters</h4>
+                  <h4 className="font-bold text-sm text-slate-900 mb-3">Top Corporate Recruiters</h4>
                   <div className="flex flex-wrap gap-2">
                     {topRecruiters.map((company: string, idx: number) => (
                       <span
                         key={idx}
-                        className="rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-800 border border-gray-200"
+                        className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-800 border border-slate-200"
                       >
                         {company}
                       </span>
@@ -260,7 +314,7 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">Placement data currently being updated for this institution.</p>
+              <p className="text-slate-500 text-sm">Placement data currently being updated for this institution.</p>
             )}
           </div>
         </TabsContent>
@@ -268,6 +322,61 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
         {/* Tab 4: Reviews */}
         <TabsContent value="reviews">
           <ReviewSection collegeSlug={college.slug} initialReviews={college.reviews} />
+        </TabsContent>
+
+        {/* Tab 5: Community Q&A */}
+        <TabsContent value="discussions">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-blue-600" />
+                  Community Q&A for {college.name}
+                </h3>
+                <p className="text-xs text-slate-500">Ask senior students and alumni about life and admissions at this campus.</p>
+              </div>
+
+              <Link href="/discussions">
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs gap-1.5">
+                  Ask Question on Forum
+                </Button>
+              </Link>
+            </div>
+
+            {college.questions && college.questions.length > 0 ? (
+              <div className="space-y-4">
+                {college.questions.map((q: any) => (
+                  <div key={q.id} className="rounded-xl bg-slate-50 p-4 border border-slate-200 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-sm text-slate-900">{q.title}</h4>
+                      <span className="text-[11px] text-slate-400">
+                        {new Date(q.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric" })}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600">{q.content}</p>
+
+                    {q.answers && q.answers.length > 0 && (
+                      <div className="pl-3 border-l-2 border-blue-400 space-y-2 pt-1">
+                        <div className="text-[11px] font-bold text-blue-800">
+                          Answer by {q.answers[0].user?.name || "Student"}:
+                        </div>
+                        <p className="text-xs text-slate-700">{q.answers[0].content}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-slate-500 space-y-2">
+                <p className="text-sm">No questions asked yet for this college.</p>
+                <Link href="/discussions">
+                  <Button size="sm" variant="outline" className="text-xs font-semibold">
+                    Be the First to Ask a Question
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>
