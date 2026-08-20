@@ -24,19 +24,18 @@ export default function LoginPage() {
     try {
       const result = await signIn("credentials", {
         redirect: false,
-        email,
+        email: email.trim(),
         password,
       });
 
       if (result?.error) {
         setErrorMsg("Invalid email address or password.");
+        setLoading(false);
       } else {
-        router.push("/colleges");
-        router.refresh();
+        window.location.href = "/colleges";
       }
     } catch (err) {
       setErrorMsg("An unexpected error occurred.");
-    } finally {
       setLoading(false);
     }
   };
@@ -51,12 +50,12 @@ export default function LoginPage() {
       });
 
       if (!result?.error) {
-        router.push("/colleges");
-        router.refresh();
+        window.location.href = "/colleges";
+      } else {
+        setLoading(false);
       }
     } catch (err) {
       console.error(err);
-    } finally {
       setLoading(false);
     }
   };

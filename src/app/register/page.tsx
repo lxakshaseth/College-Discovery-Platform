@@ -38,19 +38,17 @@ export default function RegisterPage() {
       // Auto login after registration
       const loginResult = await signIn("credentials", {
         redirect: false,
-        email,
+        email: email.trim(),
         password,
       });
 
       if (!loginResult?.error) {
-        router.push("/colleges");
-        router.refresh();
+        window.location.href = "/colleges";
       } else {
-        router.push("/login");
+        window.location.href = "/login";
       }
     } catch (err: any) {
       setErrorMsg(err.message || "An error occurred during registration.");
-    } finally {
       setLoading(false);
     }
   };
