@@ -22,6 +22,16 @@ export function CollegeFilters() {
   const [type, setType] = useState(searchParams.get("type") || "ALL");
   const [minRating, setMinRating] = useState(searchParams.get("minRating") || "ALL");
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "rating");
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
+  // Sync state when URL params change
+  useEffect(() => {
+    setQ(searchParams.get("q") || "");
+    setState(searchParams.get("state") || "ALL");
+    setType(searchParams.get("type") || "ALL");
+    setMinRating(searchParams.get("minRating") || "ALL");
+    setSortBy(searchParams.get("sortBy") || "rating");
+  }, [searchParams]);
 
   // Create query string handler
   const createQueryString = useCallback(
@@ -49,6 +59,7 @@ export function CollegeFilters() {
       sortBy: sortBy !== "rating" ? sortBy : null,
     });
     router.push(`/colleges?${query}`);
+    setMobileFilterOpen(false);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -63,15 +74,22 @@ export function CollegeFilters() {
     setMinRating("ALL");
     setSortBy("rating");
     router.push("/colleges");
+    setMobileFilterOpen(false);
   };
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-6">
-      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-        <h3 className="flex items-center gap-2 text-base font-bold text-gray-900">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-6">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <button
+          onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
+          className="flex lg:pointer-events-none items-center gap-2 text-base font-bold text-slate-900"
+        >
           <Filter className="h-4 w-4 text-blue-600" />
-          Filter & Search
-        </h3>
+          <span>Filter & Search</span>
+          <span className="lg:hidden text-xs font-normal text-blue-600 ml-1">
+            ({mobileFilterOpen ? "Hide" : "Show"})
+          </span>
+        </button>
         <button
           onClick={clearAllFilters}
           className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
@@ -80,6 +98,8 @@ export function CollegeFilters() {
           Reset
         </button>
       </div>
+
+      <div className={`${mobileFilterOpen ? "block" : "hidden"} lg:block space-y-6`}>
 
       {/* Search Input */}
       <form onSubmit={handleSearchSubmit} className="space-y-1.5">
@@ -167,6 +187,7 @@ export function CollegeFilters() {
         <SlidersHorizontal className="h-4 w-4" />
         Apply Filters
       </Button>
+      </div>
     </div>
   );
 }

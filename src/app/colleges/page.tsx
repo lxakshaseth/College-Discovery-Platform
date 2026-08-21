@@ -23,12 +23,13 @@ interface CollegesPageProps {
 
 export default async function CollegesPage({ searchParams }: CollegesPageProps) {
   const params = await searchParams;
-  const q = params.q || "";
-  const state = params.state || "";
-  const type = params.type as "PUBLIC" | "PRIVATE" | "DEEMED" | undefined;
-  const minRating = params.minRating ? parseFloat(params.minRating) : undefined;
+  const q = params.q?.trim() || "";
+  const state = params.state && params.state !== "ALL" ? params.state : "";
+  const type = params.type && params.type !== "ALL" ? (params.type as "PUBLIC" | "PRIVATE" | "DEEMED") : undefined;
+  const parsedMinRating = params.minRating && params.minRating !== "ALL" ? parseFloat(params.minRating) : NaN;
+  const minRating = !isNaN(parsedMinRating) ? parsedMinRating : undefined;
   const sortBy = params.sortBy || "rating";
-  const page = parseInt(params.page || "1");
+  const page = Math.max(1, parseInt(params.page || "1") || 1);
   const limit = 12;
 
   // Construct Prisma query filter
@@ -42,15 +43,15 @@ export default async function CollegesPage({ searchParams }: CollegesPageProps) 
     ];
   }
 
-  if (state && state !== "ALL") {
+  if (state) {
     where.state = { equals: state };
   }
 
-  if (type && type !== ("ALL" as any)) {
+  if (type) {
     where.type = type;
   }
 
-  if (minRating) {
+  if (minRating !== undefined) {
     where.rating = { gte: minRating };
   }
 

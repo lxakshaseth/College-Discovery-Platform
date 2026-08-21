@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { formatCurrency, formatPackage } from "@/lib/utils";
+import { formatCurrency, formatPackage, safeJsonParse } from "@/lib/utils";
 import { Star, MapPin, Building2, Globe, Award, CheckCircle2, TrendingUp, IndianRupee, ArrowLeft, BookOpen, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +44,10 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
   }
 
   const latestPlacement = college.placements[0];
+  const approvals: string[] = safeJsonParse<string[]>(college.approvals, []);
+  const topRecruiters: string[] = latestPlacement
+    ? safeJsonParse<string[]>(latestPlacement.topRecruiters, [])
+    : [];
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -67,7 +71,7 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
               <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 font-semibold">
                 {college.type} Institute
               </Badge>
-              {college.approvals?.map((appr: string, idx: number) => (
+              {approvals.map((appr: string, idx: number) => (
                 <Badge key={idx} variant="secondary" className="text-xs">
                   {appr}
                 </Badge>
@@ -244,7 +248,7 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
                 <div>
                   <h4 className="font-bold text-sm text-gray-900 mb-3">Top Corporate Recruiters</h4>
                   <div className="flex flex-wrap gap-2">
-                    {latestPlacement.topRecruiters?.map((company: string, idx: number) => (
+                    {topRecruiters.map((company: string, idx: number) => (
                       <span
                         key={idx}
                         className="rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-800 border border-gray-200"

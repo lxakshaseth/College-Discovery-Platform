@@ -48,16 +48,25 @@ export function CompareFloatingBar() {
             Clear
           </Button>
 
-          <Link href={`/compare?ids=${compareList.map((c) => c.id).join(",")}`}>
+          {compareList.length >= 2 ? (
+            <Link href={`/compare?ids=${compareList.map((c) => c.id).join(",")}`}>
+              <Button
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 gap-1.5 shadow-md"
+              >
+                Compare Side-by-Side
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          ) : (
             <Button
               size="sm"
-              disabled={compareList.length < 2}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 gap-1.5 shadow-md"
+              disabled
+              className="bg-slate-700 text-slate-400 text-xs font-semibold px-4 gap-1.5 cursor-not-allowed opacity-60"
             >
-              Compare Side-by-Side
-              <ArrowRight className="h-3.5 w-3.5" />
+              Add 1 more to Compare
             </Button>
-          </Link>
+          )}
         </div>
       </div>
     </div>

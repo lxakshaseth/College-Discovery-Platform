@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const collegeSearchSchema = z.object({
-  q: z.string().optional(),
-  state: z.string().optional(),
-  type: z.enum(["PUBLIC", "PRIVATE", "DEEMED"]).optional(),
-  minFees: z.coerce.number().min(0).optional(),
-  maxFees: z.coerce.number().min(0).optional(),
-  minRating: z.coerce.number().min(0).max(5).optional(),
+  q: z.string().optional().transform((v) => (v && v.trim() !== "" ? v.trim() : undefined)),
+  state: z.string().optional().transform((v) => (v && v !== "ALL" && v.trim() !== "" ? v : undefined)),
+  type: z.enum(["PUBLIC", "PRIVATE", "DEEMED", "ALL"]).optional().transform((v) => (v && v !== "ALL" ? v : undefined)),
+  minFees: z.preprocess((v) => (v === "" || v === undefined ? undefined : Number(v)), z.number().min(0).optional()),
+  maxFees: z.preprocess((v) => (v === "" || v === undefined ? undefined : Number(v)), z.number().min(0).optional()),
+  minRating: z.preprocess((v) => (v === "" || v === "ALL" || v === undefined ? undefined : Number(v)), z.number().min(0).max(5).optional()),
   sortBy: z.enum(["rating", "fees", "name", "ranking"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
   page: z.coerce.number().min(1).default(1),
