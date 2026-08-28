@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { CompareTable } from "@/components/college/CompareTable";
 import { CompareCollege, CollegeListItem } from "@/types";
 import { useCompare } from "@/components/providers/CompareContext";
+import { safeJsonParse } from "@/lib/utils";
 import Link from "next/link";
 
 function ComparePageContent() {
@@ -158,14 +159,14 @@ function ComparePageContent() {
     const rows = [
       ["Location", ...colleges.map((c) => `"${c.location}, ${c.state}"`)],
       ["Type", ...colleges.map((c) => `"${c.type}"`)],
-      ["Established", ...colleges.map((c) => `"${c.established || "N/A"}"`)],
+      ["Established", ...colleges.map((c) => `"${c.establishedYear || "N/A"}"`)],
       ["NIRF Ranking", ...colleges.map((c) => `"${c.ranking ? `#${c.ranking}` : "Unranked"}"`)],
       ["Student Rating", ...colleges.map((c) => `"${c.rating} / 5"`)],
       ["Min Tuition Fees (Annual)", ...colleges.map((c) => `"₹${c.minFees.toLocaleString("en-IN")}"`)],
       ["Avg CTC Package", ...colleges.map((c) => `"${c.placements[0]?.averagePackage ? `₹${c.placements[0].averagePackage} LPA` : "N/A"}"`)],
       ["Highest CTC Package", ...colleges.map((c) => `"${c.placements[0]?.highestPackage ? `₹${c.placements[0].highestPackage} LPA` : "N/A"}"`)],
       ["Placement Rate", ...colleges.map((c) => `"${c.placements[0]?.placementRate ? `${c.placements[0].placementRate}%` : "N/A"}"`)],
-      ["Approvals", ...colleges.map((c) => `"${c.approvals.join(", ")}"`)],
+      ["Approvals", ...colleges.map((c) => `"${safeJsonParse<string[]>(c.approvals, []).join(", ")}"`)],
       ["Official Website", ...colleges.map((c) => `"${c.website || "N/A"}"`)],
     ];
 

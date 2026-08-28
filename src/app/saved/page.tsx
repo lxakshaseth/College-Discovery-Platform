@@ -21,7 +21,7 @@ export default function SavedPage() {
     const q = searchQuery.toLowerCase();
     return (
       item.college.name.toLowerCase().includes(q) ||
-      item.college.city.toLowerCase().includes(q) ||
+      item.college.location.toLowerCase().includes(q) ||
       item.college.state.toLowerCase().includes(q)
     );
   });
