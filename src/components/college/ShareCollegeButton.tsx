@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Share2, Check } from "lucide-react";
@@ -17,8 +17,8 @@ export function ShareCollegeButton({ collegeName }: ShareCollegeButtonProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: ${collegeName} - CampusPulse,
-          text: Check out  fees, placements, and cutoffs on CampusPulse:,
+          title: `${collegeName} - CampusPulse`,
+          text: `Check out ${collegeName} fees, placements, and cutoffs on CampusPulse:`,
           url: window.location.href,
         });
         return;
