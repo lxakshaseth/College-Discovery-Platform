@@ -57,13 +57,27 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
     }
   };
 
+  const [highlightDiff, setHighlightDiff] = useState(false);
+
   return (
     <div className="space-y-4">
       {/* Share / Action Bar */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-slate-500 font-medium">
-          Comparing <span className="font-bold text-slate-900">{colleges.length}</span> institutions
-        </span>
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-500 font-medium">
+            Comparing <span className="font-bold text-slate-900">{colleges.length}</span> institutions
+          </span>
+
+          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+            <input
+              type="checkbox"
+              checked={highlightDiff}
+              onChange={(e) => setHighlightDiff(e.target.checked)}
+              className="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5"
+            />
+            <span>Highlight Key Differences</span>
+          </label>
+        </div>
 
         <Button
           variant="outline"
