@@ -148,6 +148,42 @@ function ComparePageContent() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (colleges.length === 0) return;
+    const headers = [
+      "Metric",
+      ...colleges.map((c) => `"${c.name.replace(/"/g, '""')}"`),
+    ];
+
+    const rows = [
+      ["Location", ...colleges.map((c) => `"${c.location}, ${c.state}"`)],
+      ["Type", ...colleges.map((c) => `"${c.type}"`)],
+      ["Established", ...colleges.map((c) => `"${c.established || "N/A"}"`)],
+      ["NIRF Ranking", ...colleges.map((c) => `"${c.ranking ? `#${c.ranking}` : "Unranked"}"`)],
+      ["Student Rating", ...colleges.map((c) => `"${c.rating} / 5"`)],
+      ["Min Tuition Fees (Annual)", ...colleges.map((c) => `"₹${c.minFees.toLocaleString("en-IN")}"`)],
+      ["Avg CTC Package", ...colleges.map((c) => `"${c.placements[0]?.averagePackage ? `₹${c.placements[0].averagePackage} LPA` : "N/A"}"`)],
+      ["Highest CTC Package", ...colleges.map((c) => `"${c.placements[0]?.highestPackage ? `₹${c.placements[0].highestPackage} LPA` : "N/A"}"`)],
+      ["Placement Rate", ...colleges.map((c) => `"${c.placements[0]?.placementRate ? `${c.placements[0].placementRate}%` : "N/A"}"`)],
+      ["Approvals", ...colleges.map((c) => `"${c.approvals.join(", ")}"`)],
+      ["Official Website", ...colleges.map((c) => `"${c.website || "N/A"}"`)],
+    ];
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((r) => r.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `college-comparison-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Top Banner */}
@@ -167,7 +203,28 @@ function ComparePageContent() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {colleges.length >= 2 && (
+            <>
+              <Button
+                onClick={handleExportCSV}
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs text-slate-700 hover:bg-slate-50"
+              >
+                Export CSV
+              </Button>
+              <Button
+                onClick={() => window.print()}
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs text-slate-700 hover:bg-slate-50"
+              >
+                Print
+              </Button>
+            </>
+          )}
+
           {session?.user && colleges.length >= 2 ? (
             <Button
               onClick={handleSaveComparison}
