@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SaveButton } from "@/components/college/SaveButton";
 import { ReviewSection } from "@/components/college/ReviewSection";
 import { RoiCalculator } from "@/components/college/RoiCalculator";
+import { ShareCollegeButton } from "@/components/college/ShareCollegeButton";
 
 export const dynamic = "force-dynamic";
 
@@ -122,7 +123,8 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
             </div>
           </div>
 
-          <div className="flex items-center gap-3 self-start">
+          <div className="flex items-center gap-2 self-start">
+            <ShareCollegeButton collegeName={college.name} />
             <SaveButton collegeId={college.id} />
           </div>
         </div>
