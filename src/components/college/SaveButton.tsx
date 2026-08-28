@@ -72,14 +72,19 @@ export function SaveButton({ collegeId }: SaveButtonProps) {
     <button
       onClick={toggleSave}
       disabled={loading}
-      className={`p-1.5 rounded-full transition-all ${
+      className={`relative group p-2 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400/50 ${
         isSaved
-          ? "bg-red-50 text-red-600 hover:bg-red-100"
-          : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+          ? "bg-red-50 text-red-600 hover:bg-red-100 scale-105 shadow-xs"
+          : "bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600 hover:scale-105"
       }`}
-      title={isSaved ? "Remove from wishlist" : "Save to wishlist"}
+      aria-label={isSaved ? "Remove college from wishlist" : "Save college to wishlist"}
+      title={isSaved ? "Saved to your wishlist" : "Save to wishlist"}
     >
-      <Heart className={`h-4 w-4 ${isSaved ? "fill-red-500 text-red-500" : ""}`} />
+      <Heart
+        className={`h-4 w-4 transition-transform duration-200 ${
+          isSaved ? "fill-red-500 text-red-500 scale-110" : "group-hover:scale-110"
+        } ${loading ? "animate-pulse opacity-60" : ""}`}
+      />
     </button>
   );
 }
