@@ -39,6 +39,8 @@ const INDIAN_STATES = [
 ];
 
 export default function PredictorPage() {
+  const [inputMode, setInputMode] = useState<"rank" | "percentile">("rank");
+  const [percentile, setPercentile] = useState("98.50");
   const [exam, setExam] = useState("JEE Main");
   const [rank, setRank] = useState("12000");
   const [category, setCategory] = useState("GENERAL");
@@ -137,19 +139,60 @@ export default function PredictorPage() {
               </Select>
             </div>
 
-            {/* Rank */}
+            {/* Rank / Percentile */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-slate-700">All India Rank (AIR)</Label>
-              <Input
-                type="number"
-                placeholder="e.g. 12500"
-                value={rank}
-                onChange={(e) => setRank(e.target.value)}
-                min={1}
-                max={500000}
-                required
-                className="text-sm"
-              />
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-bold text-slate-700">
+                  {inputMode === "percentile" ? "NTA Percentile Score (%)" : "All India Rank (AIR)"}
+                </Label>
+                <button
+                  type="button"
+                  onClick={() => setInputMode(inputMode === "rank" ? "percentile" : "rank")}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 underline"
+                >
+                  {inputMode === "percentile" ? "Enter AIR rank directly" : "Calculate from percentile (%)"}
+                </button>
+              </div>
+
+              {inputMode === "percentile" ? (
+                <div className="space-y-1">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="e.g. 98.65"
+                    value={percentile}
+                    onChange={(e) => {
+                      const p = e.target.value;
+                      setPercentile(p);
+                      const pVal = parseFloat(p);
+                      if (!isNaN(pVal) && pVal > 0 && pVal <= 100) {
+                        const calculatedRank = Math.max(1, Math.round(((100 - pVal) / 100) * 1450000));
+                        setRank(calculatedRank.toString());
+                      }
+                    }}
+                    min={1}
+                    max={100}
+                    required
+                    className="text-sm"
+                  />
+                  {rank && (
+                    <p className="text-[11px] text-emerald-700 font-medium">
+                      Estimated AIR: ~{parseInt(rank).toLocaleString("en-IN")}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <Input
+                  type="number"
+                  placeholder="e.g. 12500"
+                  value={rank}
+                  onChange={(e) => setRank(e.target.value)}
+                  min={1}
+                  max={500000}
+                  required
+                  className="text-sm"
+                />
+              )}
             </div>
 
             {/* Category */}
