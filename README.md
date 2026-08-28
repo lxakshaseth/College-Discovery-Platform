@@ -16,31 +16,46 @@
 
 ### 1. 🔍 Search & Listing Engine (`/colleges`)
 - **Real-Time Keyword Search**: Instant search across college names, cities, and states.
+- **Global Command Palette (`⌘K`)**: Quick search modal accessible anywhere via `Ctrl+K` / `Cmd+K` keyboard shortcut.
 - **Multi-Factor Filters**: Filter by state location, college type (`PUBLIC`, `PRIVATE`, `DEEMED`), minimum student rating, and max tuition fees.
 - **Sorting Modes**: Sort by NIRF rankings, student rating, lowest annual fees, or alphabetical order.
+- **Smart Highlights**: Dynamic visual indicators (`🔥 Top 10`, `⭐ Top Rated`, `💼 High CTC`).
 - **Server Pagination**: Paginated grid (12 colleges per page) with SEO-friendly URL search query parameters.
 
 ### 2. 🏛️ Comprehensive College Details (`/colleges/[slug]`)
 - **Header Profile**: College location, established year, NIRF rank badge, approvals (`AICTE`, `UGC`, `NAAC A++`), rating summary, and official website.
+- **Interactive ROI & Degree Cost Estimator**: Calculates 4-year total cost, living expenses, scholarship waivers, net payback period, and 5-year wealth multiplier.
 - **Courses & Fees Tab**: Tabular view of offered UG, PG, and Diploma degrees with duration and fee structures.
 - **Placements & Salary CTC Tab**: Average package (LPA), highest package (LPA), placement rate (%), and top corporate recruiters.
 - **Student Reviews Tab**: Live student review feed and interactive rating submission form.
+- **Community Q&A Feed**: Discussion questions with upvoted answers from alumni and students.
 
 ### 3. ⚖️ Side-by-Side College Comparison Matrix (`/compare`)
 - **2-3 College Comparison**: Compare 2 to 3 colleges side-by-side.
 - **Metrics Evaluated**: Fees, NIRF rank, average CTC, highest CTC, placement rate %, top recruiters, approvals, and ratings.
 - **Automated Metric Badges**: Automatic detection of **Most Affordable**, **Highest Rated**, and **Highest Salary** institutions.
+- **Export & Print**: Instant CSV spreadsheet export and clean print layout for counseling discussions.
 - **Sticky Compare Bar**: Persistent floating drawer (`CompareFloatingBar`) for selecting colleges on the go.
 
 ### 4. 🎯 Admission Rank Predictor Tool (`/predictor`)
 - **Entrance Exam Support**: Supports `JEE Main`, `JEE Advanced`, `BITSAT`, `GATE`, and `CAT`.
-- **Match Probability Tiers**: Predicts **Safe High Match**, **Moderate Match**, and **Ambitious Reach** cutoff matches based on All India Rank (AIR).
+- **NTA Percentile Converter**: Converts NTA percentile score to estimated All India Rank (AIR) in real time.
+- **Match Probability Tiers**: Predicts **Safe High Match**, **Moderate Match**, and **Ambitious Reach** cutoff matches based on All India Rank (AIR) and domicile quotas.
 
-### 5. 🔐 Authentication & Saved Wishlist (`/saved`, `/login`, `/register`)
+### 5. 💬 Community Q&A Forum (`/discussions`)
+- **Topic Tag Filtering**: Categorize questions by `#Admissions`, `#Placements`, `#HostelLife`, `#Fees`, and `#BranchComparison`.
+- **Sorting Engine**: Sort discussions by newest, most upvoted answers, or highest engagement.
+- **Upvote System**: Upvote helpful answers with live score counters.
+
+### 6. 🔐 Authentication & Saved Wishlist (`/saved`, `/login`, `/register`)
 - **NextAuth Credentials**: Secure email/password authentication with bcrypt password hashing.
-- **Saved Wishlist**: One-click heart bookmarking to save colleges to user profile.
+- **Saved Wishlist**: One-click heart bookmarking to save colleges to user profile with quick-search filtering.
 - **Saved Comparisons**: Save side-by-side comparison matrix sessions for future review.
 - **One-Click Demo Student Login**: Instant trial button for quick evaluator review.
+
+### 7. 🚀 SEO & Discoverability
+- **Dynamic XML Sitemap (`/sitemap.xml`)**: Automated generator querying all college slugs.
+- **Search Engine Crawler Rules (`/robots.txt`)**: Search indexing optimizations.
 
 ---
 

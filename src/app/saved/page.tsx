@@ -13,7 +13,18 @@ export default function SavedPage() {
   const { data: session, status } = useSession();
   const [savedColleges, setSavedColleges] = useState<SavedCollegeWithCollege[]>([]);
   const [savedComparisons, setSavedComparisons] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const filteredSavedColleges = savedColleges.filter((item) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      item.college.name.toLowerCase().includes(q) ||
+      item.college.location.toLowerCase().includes(q) ||
+      item.college.state.toLowerCase().includes(q)
+    );
+  });
 
   useEffect(() => {
     if (status !== "authenticated") {
@@ -111,21 +122,40 @@ export default function SavedPage() {
           </TabsList>
 
           {/* Saved Colleges Tab */}
-          <TabsContent value="colleges">
+          <TabsContent value="colleges" className="space-y-4">
+            {savedColleges.length > 0 && (
+              <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-3 rounded-xl border border-gray-200">
+                <input
+                  type="text"
+                  placeholder="Filter saved colleges by name or city..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full sm:w-80 px-3 py-1.5 text-sm rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-xs text-gray-500 font-medium whitespace-nowrap">
+                  Showing {filteredSavedColleges.length} of {savedColleges.length} saved colleges
+                </span>
+              </div>
+            )}
+
             {savedColleges.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-gray-300 p-12 text-center bg-white space-y-3">
                 <GraduationCap className="h-10 w-10 text-gray-400 mx-auto" />
                 <h3 className="text-lg font-bold text-gray-900">No saved colleges yet</h3>
-                <p className="text-xs text-gray-500">Click the heart icon on any college card to add it to your wishlist.</p>
+                <p className="text-xs text-gray-500">Click the bookmark icon on any college card to add it to your wishlist.</p>
                 <Link href="/colleges">
                   <Button size="sm" className="bg-blue-600 text-white font-semibold mt-2">
                     Browse Colleges
                   </Button>
                 </Link>
               </div>
+            ) : filteredSavedColleges.length === 0 ? (
+              <div className="p-8 text-center bg-white rounded-xl border border-gray-200 text-sm text-gray-500">
+                No saved colleges match "{searchQuery}"
+              </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {savedColleges.map((item) => (
+                {filteredSavedColleges.map((item) => (
                   <CollegeCard key={item.id} college={item.college as any} />
                 ))}
               </div>

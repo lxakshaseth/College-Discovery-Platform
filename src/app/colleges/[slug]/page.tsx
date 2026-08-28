@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SaveButton } from "@/components/college/SaveButton";
 import { ReviewSection } from "@/components/college/ReviewSection";
+import { RoiCalculator } from "@/components/college/RoiCalculator";
 
 export const dynamic = "force-dynamic";
 
@@ -311,6 +312,14 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
                       </span>
                     ))}
                   </div>
+                </div>
+                <div className="pt-2">
+                  <RoiCalculator
+                    minFees={college.minFees}
+                    averagePackage={latestPlacement?.averagePackage || 6.5}
+                    highestPackage={latestPlacement?.highestPackage || 12.0}
+                    collegeName={college.name}
+                  />
                 </div>
               </div>
             ) : (

@@ -36,7 +36,7 @@ export function CollegeCard({ college }: CollegeCardProps) {
       {/* Top Header Row */}
       <div>
         <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {college.ranking ? (
               <Badge variant="default" className="bg-blue-50 text-blue-700 border-blue-200 font-semibold gap-1">
                 <Award className="h-3 w-3 text-blue-600" />
@@ -53,6 +53,19 @@ export function CollegeCard({ college }: CollegeCardProps) {
             >
               {college.type}
             </Badge>
+            {college.ranking && college.ranking <= 10 ? (
+              <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-300 text-[10px] font-bold">
+                🔥 Top 10
+              </Badge>
+            ) : college.rating >= 4.6 ? (
+              <Badge variant="outline" className="bg-orange-50 text-orange-800 border-orange-200 text-[10px] font-bold">
+                ⭐ Top Rated
+              </Badge>
+            ) : (college.placements?.[0]?.averagePackage || 0) >= 20 ? (
+              <Badge variant="outline" className="bg-indigo-50 text-indigo-800 border-indigo-200 text-[10px] font-bold">
+                💼 High CTC
+              </Badge>
+            ) : null}
           </div>
           <SaveButton collegeId={college.id} />
         </div>

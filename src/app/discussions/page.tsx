@@ -211,15 +211,53 @@ export default function DiscussionsPage() {
     }
   };
 
-  const filteredQuestions = questions.filter((q) => {
-    if (!searchQuery.trim()) return true;
-    const term = searchQuery.toLowerCase();
-    return (
-      q.title.toLowerCase().includes(term) ||
-      q.content.toLowerCase().includes(term) ||
-      q.college?.name.toLowerCase().includes(term)
-    );
-  });
+  const [activeTopic, setActiveTopic] = useState("ALL");
+  const [sortOrder, setSortOrder] = useState<"newest" | "upvotes" | "answers">("newest");
+
+  const TOPIC_TAGS = [
+    { label: "All Topics", value: "ALL" },
+    { label: "🎯 Cutoffs & Admissions", value: "cutoff" },
+    { label: "💼 Placements & CTC", value: "placement" },
+    { label: "🏢 Hostels & Campus", value: "hostel" },
+    { label: "💰 Fees & Scholarships", value: "fee" },
+    { label: "⚖️ Branch Comparison", value: "branch" },
+  ];
+
+  const filteredQuestions = questions
+    .filter((q) => {
+      // Search term
+      if (searchQuery.trim()) {
+        const term = searchQuery.toLowerCase();
+        const matchesSearch =
+          q.title.toLowerCase().includes(term) ||
+          q.content.toLowerCase().includes(term) ||
+          q.college?.name.toLowerCase().includes(term);
+        if (!matchesSearch) return false;
+      }
+
+      // Topic tag
+      if (activeTopic !== "ALL") {
+        const text = (q.title + " " + q.content).toLowerCase();
+        if (activeTopic === "cutoff" && !text.includes("cutoff") && !text.includes("rank") && !text.includes("jee") && !text.includes("admission")) return false;
+        if (activeTopic === "placement" && !text.includes("placement") && !text.includes("ctc") && !text.includes("package") && !text.includes("salary")) return false;
+        if (activeTopic === "hostel" && !text.includes("hostel") && !text.includes("campus") && !text.includes("mess") && !text.includes("facility")) return false;
+        if (activeTopic === "fee" && !text.includes("fee") && !text.includes("scholarship") && !text.includes("cost")) return false;
+        if (activeTopic === "branch" && !text.includes("branch") && !text.includes("cse") && !text.includes("ece") && !text.includes("vs")) return false;
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortOrder === "upvotes") {
+        const upvotesA = a.answers.reduce((acc, ans) => acc + ans.upvotes, 0);
+        const upvotesB = b.answers.reduce((acc, ans) => acc + ans.upvotes, 0);
+        return upvotesB - upvotesA;
+      }
+      if (sortOrder === "answers") {
+        return b.answers.length - a.answers.length;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -344,32 +382,65 @@ export default function DiscussionsPage() {
       )}
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
-          <Input
-            type="text"
-            placeholder="Search questions by keyword or topic..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 text-sm"
-          />
+      <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+            <Input
+              type="text"
+              placeholder="Search questions by keyword or topic..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 text-sm"
+            />
+          </div>
+
+          <div className="w-full sm:w-56">
+            <Select value={selectedCollege} onValueChange={setSelectedCollege}>
+              <SelectTrigger className="w-full text-xs">
+                <SelectValue placeholder="All Colleges" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Colleges</SelectItem>
+                {collegesList.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="w-full sm:w-44">
+            <Select value={sortOrder} onValueChange={(val: any) => setSortOrder(val)}>
+              <SelectTrigger className="w-full text-xs">
+                <SelectValue placeholder="Sort Order" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="upvotes">Most Upvoted</SelectItem>
+                <SelectItem value="answers">Most Answered</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <div className="w-full sm:w-64">
-          <Select value={selectedCollege} onValueChange={setSelectedCollege}>
-            <SelectTrigger className="w-full text-xs">
-              <SelectValue placeholder="All Colleges" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Colleges</SelectItem>
-              {collegesList.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        {/* Topic Pills */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-100">
+          <span className="text-xs font-semibold text-slate-500 mr-1">Filter by Topic:</span>
+          {TOPIC_TAGS.map((tag) => (
+            <button
+              key={tag.value}
+              onClick={() => setActiveTopic(tag.value)}
+              className={`text-xs px-2.5 py-1 rounded-full font-medium transition ${
+                activeTopic === tag.value
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              {tag.label}
+            </button>
+          ))}
         </div>
       </div>
 
