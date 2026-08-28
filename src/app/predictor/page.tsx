@@ -344,7 +344,13 @@ export default function PredictorPage() {
                     <div className="p-3 rounded-xl bg-slate-50 text-xs space-y-2 border border-slate-100">
                       <div className="flex justify-between items-center">
                         <span className="text-slate-500">Est. Closing Cutoff:</span>
-                        <span className="font-bold text-slate-900">~ AIR #{c.matchDetails.cutoffEstimate}</span>
+                        <span className="font-bold text-slate-900">~ AIR #{c.matchDetails.cutoffEstimate.toLocaleString("en-IN")}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500">Seat Quota Applied:</span>
+                        <span className="font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded text-[11px]">
+                          {c.matchDetails.isHomeState ? "Home State (HS)" : "All India (AI)"}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-slate-500">Annual Tuition Fees:</span>
