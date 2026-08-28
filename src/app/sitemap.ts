@@ -1,4 +1,4 @@
-﻿import { MetadataRoute } from "next";
+import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -6,31 +6,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
-      url: ${baseUrl},
+      url: `${baseUrl}`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
-      url: ${baseUrl}/colleges,
+      url: `${baseUrl}/colleges`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
-      url: ${baseUrl}/compare,
+      url: `${baseUrl}/compare`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
-      url: ${baseUrl}/predictor,
+      url: `${baseUrl}/predictor`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
-      url: ${baseUrl}/discussions,
+      url: `${baseUrl}/discussions`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.7,
@@ -46,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     const collegeRoutes: MetadataRoute.Sitemap = colleges.map((college) => ({
-      url: ${baseUrl}/colleges/,
+      url: `${baseUrl}/colleges/${college.slug}`,
       lastModified: college.updatedAt || new Date(),
       changeFrequency: "weekly",
       priority: 0.8,

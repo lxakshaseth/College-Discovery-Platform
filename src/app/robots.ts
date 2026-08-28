@@ -1,4 +1,4 @@
-﻿import { MetadataRoute } from "next";
+import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = process.env.NEXTAUTH_URL || "https://campuspulse.vercel.app";
@@ -11,6 +11,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/login", "/register"],
       },
     ],
-    sitemap: ${baseUrl}/sitemap.xml,
+    sitemap: `${baseUrl}/sitemap.xml`,
   };
 }

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -56,7 +56,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(/api/colleges?search=&limit=6);
+        const res = await fetch(`/api/colleges?search=${encodeURIComponent(query)}&limit=6`);
         if (res.ok) {
           const json = await res.json();
           setResults(json.data || []);
@@ -124,12 +124,12 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                 results.map((c) => (
                   <button
                     key={c.id}
-                    onClick={() => navigateTo(/colleges/)}
+                    onClick={() => navigateTo(`/colleges/${c.slug}`)}
                     className="w-full p-2.5 rounded-xl text-left hover:bg-blue-50 transition flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg bg-blue-100 text-blue-700 font-bold text-xs">
-                        {c.ranking ? # : "🎓"}
+                        {c.ranking ? `#${c.ranking}` : "🎓"}
                       </div>
                       <div>
                         <div className="text-sm font-bold text-slate-900 group-hover:text-blue-700">
