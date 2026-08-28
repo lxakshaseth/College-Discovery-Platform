@@ -8,12 +8,14 @@ import { GraduationCap, Scale, Bookmark, Search, User, LogOut, Sparkles, Menu, X
 import { Button } from "@/components/ui/button";
 import { useCompare } from "@/components/providers/CompareContext";
 import { Badge } from "@/components/ui/badge";
+import { CommandPalette } from "./CommandPalette";
 
 export function Header() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { compareList } = useCompare();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   const navLinks = [
     { name: "Explore Colleges", href: "/colleges", icon: Search },
@@ -65,6 +67,19 @@ export function Header() {
 
         {/* Desktop Auth / Account Controls & Mobile Toggle */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Quick Search Shortcut Trigger */}
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition text-xs"
+            title="Search (Ctrl+K)"
+          >
+            <Search className="h-3.5 w-3.5 text-slate-400" />
+            <span className="hidden lg:inline">Search...</span>
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold bg-white border border-slate-300 rounded shadow-xs text-slate-500">
+              ⌘K
+            </kbd>
+          </button>
+
           {session?.user ? (
             <div className="flex items-center gap-2 sm:gap-3">
               <span className="hidden sm:inline-block text-sm font-medium text-slate-700">
@@ -105,6 +120,8 @@ export function Header() {
           </button>
         </div>
       </div>
+
+      <CommandPalette isOpen={paletteOpen} onClose={() => setPaletteOpen(false)} />
 
       {/* Mobile Navigation Dropdown */}
       {mobileMenuOpen && (
