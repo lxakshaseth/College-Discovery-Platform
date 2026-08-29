@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Star, MapPin, Building, IndianRupee, Trophy, Check, X, Award, ExternalLink, Share2, CheckCheck } from "lucide-react";
+import { Star, MapPin, Building, IndianRupee, Trophy, Check, X, Award, ExternalLink, Share2, CheckCheck, Download } from "lucide-react";
 import { CompareCollege } from "@/types";
 import { formatCurrency, formatPackage, safeJsonParse } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +57,52 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
     }
   };
 
+  const exportComparisonCSV = () => {
+    if (typeof window === "undefined" || colleges.length === 0) return;
+
+    const headers = [
+      "Feature Parameter",
+      ...colleges.map((c) => `"${c.name.replace(/"/g, '""')}"`),
+    ];
+
+    const rows = [
+      ["Location", ...colleges.map((c) => `"${c.location}, ${c.state}"`)],
+      ["Institute Type", ...colleges.map((c) => `"${c.type}"`)],
+      ["NIRF Ranking", ...colleges.map((c) => (c.ranking ? `#${c.ranking}` : "Unranked"))],
+      ["Student Rating", ...colleges.map((c) => `"${c.rating.toFixed(1)} / 5.0"`)],
+      ["Established Year", ...colleges.map((c) => `"${c.establishedYear}"`)],
+      ["Annual Tuition Fees", ...colleges.map((c) => `"${formatCurrency(c.minFees)} / yr"`)],
+      ["Average Package (CTC)", ...colleges.map((c) => (c.placements[0] ? `"${c.placements[0].averagePackage} LPA"` : "N/A"))],
+      ["Highest Package (CTC)", ...colleges.map((c) => (c.placements[0] ? `"${c.placements[0].highestPackage} LPA"` : "N/A"))],
+      ["Placement Rate", ...colleges.map((c) => (c.placements[0] ? `"${c.placements[0].placementRate}%"` : "N/A"))],
+      [
+        "Top Recruiters",
+        ...colleges.map((c) => {
+          const rec = c.placements[0] ? safeJsonParse<string[]>(c.placements[0].topRecruiters, []) : [];
+          return `"${rec.join(", ").replace(/"/g, '""')}"`;
+        }),
+      ],
+      [
+        "Exams Accepted",
+        ...colleges.map((c) => {
+          const exams = safeJsonParse<string[]>(c.examsAccepted, []);
+          return `"${exams.join(", ").replace(/"/g, '""')}"`;
+        }),
+      ],
+    ];
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `college_comparison_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const [highlightDiff, setHighlightDiff] = useState(false);
 
   return (
@@ -79,24 +125,37 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
           </label>
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleShare}
-          className="text-xs font-semibold gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50"
-        >
-          {copied ? (
-            <>
-              <CheckCheck className="h-3.5 w-3.5 text-emerald-600" />
-              Link Copied!
-            </>
-          ) : (
-            <>
-              <Share2 className="h-3.5 w-3.5 text-slate-500" />
-              Share Comparison
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportComparisonCSV}
+            className="text-xs font-semibold gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50"
+            title="Download comparison matrix as CSV spreadsheet"
+          >
+            <Download className="h-3.5 w-3.5 text-slate-500" />
+            <span>Export CSV</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+            className="text-xs font-semibold gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50"
+          >
+            {copied ? (
+              <>
+                <CheckCheck className="h-3.5 w-3.5 text-emerald-600" />
+                Link Copied!
+              </>
+            ) : (
+              <>
+                <Share2 className="h-3.5 w-3.5 text-slate-500" />
+                Share Comparison
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">

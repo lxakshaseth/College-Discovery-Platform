@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Trophy, CheckCircle, AlertTriangle, ArrowUpRight, Scale, Check, Filter, Layers, Target, Compass } from "lucide-react";
+import { Sparkles, Trophy, CheckCircle, AlertTriangle, ArrowUpRight, Scale, Check, Filter, Layers, Target, Compass, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,6 +101,51 @@ export default function PredictorPage() {
   const highChanceCount = results?.filter((c) => c.matchDetails.admissionChance === "HIGH").length || 0;
   const mediumChanceCount = results?.filter((c) => c.matchDetails.admissionChance === "MEDIUM").length || 0;
   const lowChanceCount = results?.filter((c) => c.matchDetails.admissionChance === "LOW").length || 0;
+
+  const exportPredictorCSV = () => {
+    if (typeof window === "undefined" || !results || results.length === 0) return;
+
+    const headers = [
+      "College Name",
+      "Location",
+      "State",
+      "Institute Type",
+      "Exam",
+      "User Rank",
+      "Category",
+      "Quota",
+      "Admission Probability",
+      "Est. Closing Cutoff",
+      "Annual Tuition Fees",
+      "Avg Placement CTC",
+    ];
+
+    const rows = results.map((c) => [
+      `"${c.name.replace(/"/g, '""')}"`,
+      `"${c.location}"`,
+      `"${c.state}"`,
+      `"${c.type}"`,
+      `"${exam}"`,
+      `"${rank}"`,
+      `"${category}"`,
+      `"${c.matchDetails.isHomeState ? "Home State" : "All India"}"`,
+      `"${c.matchDetails.admissionChance}"`,
+      `"${c.matchDetails.cutoffEstimate}"`,
+      `"${formatCurrency(c.minFees)}"`,
+      `"${c.placements[0] ? formatPackage(c.placements[0].averagePackage) : "N/A"}"`,
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `admission_prediction_report_${exam.replace(/\s+/g, "_")}_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -259,43 +304,56 @@ export default function PredictorPage() {
               </p>
             </div>
 
-            {/* Tier Filters */}
-            <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 shadow-sm overflow-x-auto text-xs font-semibold">
-              <button
-                onClick={() => setTierFilter("ALL")}
-                className={`px-3 py-1.5 rounded-lg transition ${
-                  tierFilter === "ALL" ? "bg-slate-900 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
-                }`}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Tier Filters */}
+              <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 shadow-sm overflow-x-auto text-xs font-semibold">
+                <button
+                  onClick={() => setTierFilter("ALL")}
+                  className={`px-3 py-1.5 rounded-lg transition ${
+                    tierFilter === "ALL" ? "bg-slate-900 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  All ({results.length})
+                </button>
+                <button
+                  onClick={() => setTierFilter("HIGH")}
+                  className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${
+                    tierFilter === "HIGH" ? "bg-emerald-600 text-white shadow-xs" : "text-emerald-700 hover:bg-emerald-50"
+                  }`}
+                >
+                  <CheckCircle className="h-3 w-3" />
+                  Safe ({highChanceCount})
+                </button>
+                <button
+                  onClick={() => setTierFilter("MEDIUM")}
+                  className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${
+                    tierFilter === "MEDIUM" ? "bg-amber-600 text-white shadow-xs" : "text-amber-700 hover:bg-amber-50"
+                  }`}
+                >
+                  <Target className="h-3 w-3" />
+                  Target ({mediumChanceCount})
+                </button>
+                <button
+                  onClick={() => setTierFilter("LOW")}
+                  className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${
+                    tierFilter === "LOW" ? "bg-purple-600 text-white shadow-xs" : "text-purple-700 hover:bg-purple-50"
+                  }`}
+                >
+                  <Compass className="h-3 w-3" />
+                  Dream ({lowChanceCount})
+                </button>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exportPredictorCSV}
+                className="text-xs font-semibold gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50 bg-white"
+                title="Download admission probability recommendations as CSV"
               >
-                All ({results.length})
-              </button>
-              <button
-                onClick={() => setTierFilter("HIGH")}
-                className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${
-                  tierFilter === "HIGH" ? "bg-emerald-600 text-white shadow-xs" : "text-emerald-700 hover:bg-emerald-50"
-                }`}
-              >
-                <CheckCircle className="h-3 w-3" />
-                Safe ({highChanceCount})
-              </button>
-              <button
-                onClick={() => setTierFilter("MEDIUM")}
-                className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${
-                  tierFilter === "MEDIUM" ? "bg-amber-600 text-white shadow-xs" : "text-amber-700 hover:bg-amber-50"
-                }`}
-              >
-                <Target className="h-3 w-3" />
-                Target ({mediumChanceCount})
-              </button>
-              <button
-                onClick={() => setTierFilter("LOW")}
-                className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${
-                  tierFilter === "LOW" ? "bg-purple-600 text-white shadow-xs" : "text-purple-700 hover:bg-purple-50"
-                }`}
-              >
-                <Compass className="h-3 w-3" />
-                Dream ({lowChanceCount})
-              </button>
+                <Download className="h-3.5 w-3.5 text-slate-500" />
+                <span className="hidden sm:inline">Export Report</span>
+              </Button>
             </div>
           </div>
 
