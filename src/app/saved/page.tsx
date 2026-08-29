@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Bookmark, Scale, Trash2, ArrowUpRight, GraduationCap, Lock } from "lucide-react";
+import { Bookmark, Scale, Trash2, ArrowUpRight, GraduationCap, Lock, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CollegeCard } from "@/components/college/CollegeCard";
 import { SavedCollegeWithCollege } from "@/types";
+import { formatCurrency, formatPackage } from "@/lib/utils";
 
 export default function SavedPage() {
   const { data: session, status } = useSession();
@@ -15,6 +16,45 @@ export default function SavedPage() {
   const [savedComparisons, setSavedComparisons] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const exportWishlistCSV = () => {
+    if (typeof window === "undefined" || savedColleges.length === 0) return;
+
+    const headers = [
+      "College Name",
+      "Location",
+      "State",
+      "Type",
+      "NIRF Rank",
+      "Rating",
+      "Annual Tuition Fees",
+      "Avg Placement CTC",
+      "Website",
+    ];
+
+    const rows = savedColleges.map(({ college }: any) => [
+      `"${college.name.replace(/"/g, '""')}"`,
+      `"${college.location}"`,
+      `"${college.state}"`,
+      `"${college.type}"`,
+      `"${college.ranking ? `#${college.ranking}` : "Unranked"}"`,
+      `"${college.rating ? college.rating.toFixed(1) : "0.0"} / 5.0"`,
+      `"${formatCurrency(college.minFees || 0)}"`,
+      `"${college.placements?.[0] ? formatPackage(college.placements[0].averagePackage) : "N/A"}"`,
+      `"${college.website || ""}"`,
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `saved_colleges_wishlist_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   const filteredSavedColleges = savedColleges.filter((item) => {
     if (!searchQuery.trim()) return true;
@@ -132,9 +172,21 @@ export default function SavedPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full sm:w-80 px-3 py-1.5 text-sm rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <span className="text-xs text-gray-500 font-medium whitespace-nowrap">
-                  Showing {filteredSavedColleges.length} of {savedColleges.length} saved colleges
-                </span>
+                <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                  <span className="text-xs text-gray-500 font-medium whitespace-nowrap">
+                    Showing {filteredSavedColleges.length} of {savedColleges.length} saved colleges
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={exportWishlistCSV}
+                    className="text-xs font-semibold gap-1.5 border-gray-200 text-gray-700 hover:bg-gray-50 shrink-0"
+                    title="Export your shortlisted colleges as CSV spreadsheet"
+                  >
+                    <Download className="h-3.5 w-3.5 text-gray-500" />
+                    <span>Export Wishlist</span>
+                  </Button>
+                </div>
               </div>
             )}
 
