@@ -15,6 +15,7 @@ interface CollegesPageProps {
     q?: string;
     state?: string;
     type?: string;
+    maxFees?: string;
     minRating?: string;
     sortBy?: string;
     page?: string;
@@ -26,6 +27,8 @@ export default async function CollegesPage({ searchParams }: CollegesPageProps) 
   const q = params.q?.trim() || "";
   const state = params.state && params.state !== "ALL" ? params.state : "";
   const type = params.type && params.type !== "ALL" ? (params.type as "PUBLIC" | "PRIVATE" | "DEEMED") : undefined;
+  const parsedMaxFees = params.maxFees && params.maxFees !== "ALL" ? parseInt(params.maxFees, 10) : NaN;
+  const maxFees = !isNaN(parsedMaxFees) ? parsedMaxFees : undefined;
   const parsedMinRating = params.minRating && params.minRating !== "ALL" ? parseFloat(params.minRating) : NaN;
   const minRating = !isNaN(parsedMinRating) ? parsedMinRating : undefined;
   const sortBy = params.sortBy || "rating";
@@ -49,6 +52,10 @@ export default async function CollegesPage({ searchParams }: CollegesPageProps) 
 
   if (type) {
     where.type = type;
+  }
+
+  if (maxFees !== undefined) {
+    where.minFees = { lte: maxFees };
   }
 
   if (minRating !== undefined) {
@@ -99,6 +106,7 @@ export default async function CollegesPage({ searchParams }: CollegesPageProps) 
     if (q) p.set("q", q);
     if (state) p.set("state", state);
     if (type) p.set("type", type);
+    if (maxFees) p.set("maxFees", maxFees.toString());
     if (minRating) p.set("minRating", minRating.toString());
     if (sortBy) p.set("sortBy", sortBy);
     p.set("page", pageNum.toString());
