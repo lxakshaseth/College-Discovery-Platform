@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Star, MapPin, IndianRupee, Award, ArrowUpRight, Scale, Check, Building2 } from "lucide-react";
+import { Star, MapPin, IndianRupee, Award, ArrowUpRight, Scale, Check, Building2, Share2, BookOpen } from "lucide-react";
 import { CollegeListItem } from "@/types";
 import { formatCurrency, formatPackage } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +16,20 @@ interface CollegeCardProps {
 
 export function CollegeCard({ college }: CollegeCardProps) {
   const { addToCompare, removeFromCompare, isInCompare, compareList } = useCompare();
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const isComparing = isInCompare(college.id);
+
+  const handleQuickShare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof window !== "undefined") {
+      const url = `${window.location.origin}/colleges/${college.slug}`;
+      navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    }
+  };
 
   const handleCompareClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -67,7 +80,20 @@ export function CollegeCard({ college }: CollegeCardProps) {
               </Badge>
             ) : null}
           </div>
-          <SaveButton collegeId={college.id} />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleQuickShare}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition"
+              title={linkCopied ? "Link Copied to Clipboard!" : "Copy link"}
+            >
+              {linkCopied ? (
+                <Check className="h-4 w-4 text-emerald-600" />
+              ) : (
+                <Share2 className="h-4 w-4" />
+              )}
+            </button>
+            <SaveButton collegeId={college.id} />
+          </div>
         </div>
 
         {/* College Name & Slug link */}
@@ -78,7 +104,7 @@ export function CollegeCard({ college }: CollegeCardProps) {
         </Link>
 
         {/* Location & Established */}
-        <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
+        <div className="flex flex-wrap items-center gap-2.5 text-xs text-gray-500 mb-4">
           <span className="flex items-center gap-1">
             <MapPin className="h-3.5 w-3.5 text-gray-400" />
             {college.location}, {college.state}
@@ -88,6 +114,15 @@ export function CollegeCard({ college }: CollegeCardProps) {
             <Building2 className="h-3.5 w-3.5 text-gray-400" />
             Estd {college.establishedYear}
           </span>
+          {college._count?.courses ? (
+            <>
+              <span>•</span>
+              <span className="flex items-center gap-1 text-slate-600 font-medium">
+                <BookOpen className="h-3.5 w-3.5 text-blue-500" />
+                {college._count.courses} Courses
+              </span>
+            </>
+          ) : null}
         </div>
 
         {/* Metrics Grid: Fees, Rating & Avg CTC */}
