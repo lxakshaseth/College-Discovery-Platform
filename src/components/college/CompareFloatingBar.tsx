@@ -11,7 +11,7 @@ export function CompareFloatingBar() {
   if (compareList.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-3xl rounded-2xl border border-gray-800 bg-gray-900/95 p-4 text-white shadow-2xl backdrop-blur-md">
+    <div className="no-print fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-3xl rounded-2xl border border-gray-800 bg-gray-900/95 p-4 text-white shadow-2xl backdrop-blur-md">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Selected Colleges chips */}
         <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
