@@ -32,11 +32,29 @@ export function ReviewSection({ collegeSlug, initialReviews }: ReviewSectionProp
   const { data: session } = useSession();
   const [reviews, setReviews] = useState<ReviewItem[]>(initialReviews);
   const [rating, setRating] = useState(5);
+  const [starFilter, setStarFilter] = useState<number | null>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+
+  const ratingCounts: Record<number, number> = {
+    5: reviews.filter((r) => Math.round(r.rating) === 5).length,
+    4: reviews.filter((r) => Math.round(r.rating) === 4).length,
+    3: reviews.filter((r) => Math.round(r.rating) === 3).length,
+    2: reviews.filter((r) => Math.round(r.rating) === 2).length,
+    1: reviews.filter((r) => Math.round(r.rating) === 1).length,
+  };
+
+  const totalReviews = reviews.length;
+  const averageRating = totalReviews > 0
+    ? (reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1)
+    : "0.0";
+
+  const filteredReviews = starFilter !== null
+    ? reviews.filter((r) => Math.round(r.rating) === starFilter)
+    : reviews;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,14 +177,109 @@ export function ReviewSection({ collegeSlug, initialReviews }: ReviewSectionProp
         )}
       </div>
 
+      {/* Rating Breakdown & Stats */}
+      {totalReviews > 0 && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            {/* Overall Score */}
+            <div className="text-center md:border-r md:border-slate-100 md:pr-6 space-y-2">
+              <span className="text-4xl font-extrabold text-slate-900 tracking-tight">{averageRating}</span>
+              <div className="flex items-center justify-center gap-1 text-amber-400">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className={`h-5 w-5 ${
+                      s <= Math.round(Number(averageRating))
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-slate-200"
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-slate-500">Based on {totalReviews} student reviews</p>
+            </div>
+
+            {/* Star Distribution Progress Bars */}
+            <div className="md:col-span-2 space-y-2">
+              {[5, 4, 3, 2, 1].map((stars) => {
+                const count = ratingCounts[stars] || 0;
+                const percentage = totalReviews > 0 ? Math.round((count / totalReviews) * 100) : 0;
+                const isSelected = starFilter === stars;
+
+                return (
+                  <button
+                    key={stars}
+                    onClick={() => setStarFilter(isSelected ? null : stars)}
+                    className={`w-full flex items-center gap-3 text-xs py-1 px-2 rounded-lg transition text-left ${
+                      isSelected ? "bg-amber-50 font-bold" : "hover:bg-slate-50 text-slate-600"
+                    }`}
+                  >
+                    <span className="w-12 font-semibold flex items-center gap-1">
+                      {stars} <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    </span>
+
+                    <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full bg-amber-400 rounded-full transition-all duration-300"
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+
+                    <span className="w-10 text-right text-[11px] text-slate-400">{percentage}%</span>
+                    <span className="w-8 text-right font-medium text-slate-700">({count})</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Reviews List */}
       <div className="space-y-4">
-        <h4 className="font-bold text-gray-900 text-base">Verified Student Reviews ({reviews.length})</h4>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <h4 className="font-bold text-gray-900 text-base">
+            Verified Student Reviews ({filteredReviews.length}
+            {starFilter !== null ? ` with ${starFilter}★` : ""})
+          </h4>
 
-        {reviews.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">No reviews yet. Be the first to review!</p>
+          {/* Rating filter pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto text-xs font-semibold">
+            <button
+              onClick={() => setStarFilter(null)}
+              className={`px-3 py-1 rounded-lg transition ${
+                starFilter === null
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              All ({totalReviews})
+            </button>
+            {[5, 4, 3, 2, 1].map((s) => (
+              <button
+                key={s}
+                onClick={() => setStarFilter(starFilter === s ? null : s)}
+                className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                  starFilter === s
+                    ? "bg-amber-500 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                <span>{s}★</span>
+                <span className="text-[10px] opacity-80">({ratingCounts[s] || 0})</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filteredReviews.length === 0 ? (
+          <p className="text-sm text-gray-500 italic">
+            {starFilter !== null
+              ? `No reviews found with ${starFilter} stars.`
+              : "No reviews yet. Be the first to review!"}
+          </p>
         ) : (
-          reviews.map((rev) => (
+          filteredReviews.map((rev) => (
             <div key={rev.id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
