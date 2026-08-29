@@ -212,7 +212,10 @@ export default function DiscussionsPage() {
   };
 
   const [activeTopic, setActiveTopic] = useState("ALL");
-  const [sortOrder, setSortOrder] = useState<"newest" | "upvotes" | "answers">("newest");
+  const [unansweredOnly, setUnansweredOnly] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"newest" | "upvotes" | "answers" | "unanswered">("newest");
+
+  const unansweredCount = questions.filter((q) => q.answers.length === 0).length;
 
   const TOPIC_TAGS = [
     { label: "All Topics", value: "ALL" },
@@ -225,6 +228,9 @@ export default function DiscussionsPage() {
 
   const filteredQuestions = questions
     .filter((q) => {
+      // Unanswered only filter
+      if (unansweredOnly && q.answers.length > 0) return false;
+
       // Search term
       if (searchQuery.trim()) {
         const term = searchQuery.toLowerCase();
@@ -248,6 +254,9 @@ export default function DiscussionsPage() {
       return true;
     })
     .sort((a, b) => {
+      if (sortOrder === "unanswered") {
+        return a.answers.length - b.answers.length;
+      }
       if (sortOrder === "upvotes") {
         const upvotesA = a.answers.reduce((acc, ans) => acc + ans.upvotes, 0);
         const upvotesB = b.answers.reduce((acc, ans) => acc + ans.upvotes, 0);
@@ -420,6 +429,7 @@ export default function DiscussionsPage() {
                 <SelectItem value="newest">Newest First</SelectItem>
                 <SelectItem value="upvotes">Most Upvoted</SelectItem>
                 <SelectItem value="answers">Most Answered</SelectItem>
+                <SelectItem value="unanswered">Unanswered First</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -441,6 +451,25 @@ export default function DiscussionsPage() {
               {tag.label}
             </button>
           ))}
+
+          <button
+            onClick={() => setUnansweredOnly(!unansweredOnly)}
+            className={`text-xs px-2.5 py-1 rounded-full font-medium transition flex items-center gap-1.5 ${
+              unansweredOnly
+                ? "bg-amber-600 text-white shadow-xs font-semibold"
+                : "bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100"
+            }`}
+            title="Show questions with 0 answers"
+          >
+            <span>❓ Unanswered</span>
+            <span
+              className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                unansweredOnly ? "bg-amber-700 text-white" : "bg-amber-200 text-amber-900"
+              }`}
+            >
+              {unansweredCount}
+            </span>
+          </button>
         </div>
       </div>
 
