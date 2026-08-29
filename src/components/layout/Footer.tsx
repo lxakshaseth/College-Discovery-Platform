@@ -21,7 +21,7 @@ export function Footer() {
 
           {/* Col 2 */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Discovery</h4>
+            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Discovery Tools</h4>
             <ul className="space-y-2.5 text-sm">
               <li>
                 <Link href="/colleges" className="hover:text-white transition">Search Colleges</Link>
@@ -31,6 +31,9 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/predictor" className="hover:text-white transition">College Rank Predictor</Link>
+              </li>
+              <li>
+                <Link href="/discussions" className="hover:text-white transition">Community Q&A Forum</Link>
               </li>
               <li>
                 <Link href="/saved" className="hover:text-white transition">Saved Wishlist</Link>
@@ -43,13 +46,19 @@ export function Footer() {
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Popular Hubs</h4>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <Link href="/colleges?type=PUBLIC" className="hover:text-white transition">Top Government IITs & NITs</Link>
+                <Link href="/colleges?sortBy=ranking" className="hover:text-white transition">Top NIRF Ranked Colleges</Link>
               </li>
               <li>
-                <Link href="/colleges?type=PRIVATE" className="hover:text-white transition">Top Private Deemed Universities</Link>
+                <Link href="/colleges?type=PUBLIC" className="hover:text-white transition">Government IITs & NITs</Link>
+              </li>
+              <li>
+                <Link href="/colleges?type=PRIVATE" className="hover:text-white transition">Private & Deemed Universities</Link>
               </li>
               <li>
                 <Link href="/colleges?state=Maharashtra" className="hover:text-white transition">Colleges in Maharashtra</Link>
+              </li>
+              <li>
+                <Link href="/colleges?state=Karnataka" className="hover:text-white transition">Colleges in Karnataka</Link>
               </li>
               <li>
                 <Link href="/colleges?state=Delhi" className="hover:text-white transition">Colleges in Delhi NCR</Link>
