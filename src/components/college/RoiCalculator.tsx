@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Calculator, TrendingUp, DollarSign, Clock, Award, ShieldCheck } from "lucide-react";
@@ -20,27 +20,36 @@ export function RoiCalculator({
   highestPackage,
   collegeName,
 }: RoiCalculatorProps) {
+  const defaultAvg = averagePackage || 12.0;
   const [durationYears, setDurationYears] = useState(4);
   const [annualTuition, setAnnualTuition] = useState(minFees || 150000);
   const [annualLivingCost, setAnnualLivingCost] = useState(120000);
   const [scholarshipPercent, setScholarshipPercent] = useState(0);
+  const [expectedSalaryLpa, setExpectedSalaryLpa] = useState<number>(defaultAvg);
+  const [annualHikePercent, setAnnualHikePercent] = useState<number>(10);
 
   const effectiveAnnualTuition = annualTuition * (1 - scholarshipPercent / 100);
   const totalTuitionCost = effectiveAnnualTuition * durationYears;
   const totalLivingCost = annualLivingCost * durationYears;
   const totalInvestment = totalTuitionCost + totalLivingCost;
 
-  // Placement CTC in Rupees
-  const avgSalaryRupees = (averagePackage || 6.5) * 100000;
-  // Estimated in-hand net annual salary ~80% of CTC
-  const estimatedInHandSalary = avgSalaryRupees * 0.8;
+  // Placement CTC in Rupees & starting in-hand
+  const startingSalaryRupees = (expectedSalaryLpa || 1) * 100000;
+  const startingInHand = startingSalaryRupees * 0.8;
 
   // Payback period in years
-  const paybackYears = estimatedInHandSalary > 0 ? (totalInvestment / estimatedInHandSalary).toFixed(1) : "N/A";
-  
-  // 5-Year Net ROI Multiple = (5 * InHand - Investment) / Investment * 100
-  const fiveYearEarnings = estimatedInHandSalary * 5;
+  const paybackYears = startingInHand > 0 ? (totalInvestment / startingInHand).toFixed(1) : "N/A";
+
+  // Cumulative 5-year in-hand earnings with annual hike compound growth
+  let fiveYearEarnings = 0;
+  let currentYearSalary = startingInHand;
+  for (let y = 1; y <= 5; y++) {
+    fiveYearEarnings += currentYearSalary;
+    currentYearSalary *= 1 + annualHikePercent / 100;
+  }
+
   const roiMultiplier = totalInvestment > 0 ? (fiveYearEarnings / totalInvestment).toFixed(1) : "0";
+  const netWealthCreated = Math.max(0, fiveYearEarnings - totalInvestment);
 
   return (
     <Card className="border-blue-100 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/30 shadow-sm overflow-hidden">
@@ -62,7 +71,7 @@ export function RoiCalculator({
 
       <CardContent className="p-6 space-y-6">
         {/* Controls Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold text-slate-700">Course Duration (Years)</Label>
             <Input
@@ -110,14 +119,49 @@ export function RoiCalculator({
               className="bg-white text-sm"
             />
           </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold text-slate-700">Expected Starting CTC (LPA)</Label>
+              {averagePackage ? (
+                <button
+                  type="button"
+                  onClick={() => setExpectedSalaryLpa(averagePackage)}
+                  className="text-[10px] text-blue-600 hover:underline font-medium"
+                >
+                  Reset ({averagePackage} LPA)
+                </button>
+              ) : null}
+            </div>
+            <Input
+              type="number"
+              step={0.5}
+              min={1}
+              value={expectedSalaryLpa}
+              onChange={(e) => setExpectedSalaryLpa(Math.max(0.5, parseFloat(e.target.value) || 0.5))}
+              className="bg-white text-sm"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-slate-700">Annual Salary Hike / Growth (%)</Label>
+            <Input
+              type="number"
+              min={0}
+              max={50}
+              value={annualHikePercent}
+              onChange={(e) => setAnnualHikePercent(Math.max(0, parseInt(e.target.value) || 0))}
+              className="bg-white text-sm"
+            />
+          </div>
         </div>
 
         {/* Results Matrix */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
           {/* Card 1: Total Investment */}
           <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-1 shadow-sm">
             <span className="text-xs font-medium text-slate-500">Total {durationYears}-Year Investment</span>
-            <div className="text-xl sm:text-2xl font-black text-slate-900">
+            <div className="text-lg sm:text-xl font-black text-slate-900">
               {formatCurrency(totalInvestment)}
             </div>
             <p className="text-[11px] text-slate-500">
@@ -131,25 +175,39 @@ export function RoiCalculator({
               <Clock className="h-3.5 w-3.5" />
               Payback Duration
             </span>
-            <div className="text-xl sm:text-2xl font-black text-emerald-700">
+            <div className="text-lg sm:text-xl font-black text-emerald-700">
               ~{paybackYears} {parseFloat(paybackYears) === 1 ? "Year" : "Years"}
             </div>
             <p className="text-[11px] text-emerald-600 font-medium">
-              Based on {formatPackage(averagePackage || 6.5)} avg CTC
+              Based on {formatPackage(expectedSalaryLpa)} starting CTC
             </p>
           </div>
 
-          {/* Card 3: 5-Year ROI Return */}
+          {/* Card 3: 5-Year Cumulative Salary */}
           <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 space-y-1 shadow-sm">
             <span className="text-xs font-medium text-indigo-800 flex items-center gap-1">
               <TrendingUp className="h-3.5 w-3.5" />
-              5-Year Wealth Multiplier
+              5-Yr Cumulative Salary
             </span>
-            <div className="text-xl sm:text-2xl font-black text-indigo-700">
-              {roiMultiplier}x Return
+            <div className="text-lg sm:text-xl font-black text-indigo-700">
+              {formatCurrency(fiveYearEarnings)}
             </div>
             <p className="text-[11px] text-indigo-600 font-medium">
-              ~{formatCurrency(fiveYearEarnings)} 5-yr estimated earnings
+              With {annualHikePercent}% annual growth
+            </p>
+          </div>
+
+          {/* Card 4: 5-Year Net ROI Multiple */}
+          <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-4 space-y-1 shadow-sm">
+            <span className="text-xs font-medium text-purple-800 flex items-center gap-1">
+              <Award className="h-3.5 w-3.5" />
+              Net Career Wealth
+            </span>
+            <div className="text-lg sm:text-xl font-black text-purple-700">
+              +{formatCurrency(netWealthCreated)}
+            </div>
+            <p className="text-[11px] text-purple-600 font-medium">
+              {roiMultiplier}x ROI Multiple
             </p>
           </div>
         </div>
