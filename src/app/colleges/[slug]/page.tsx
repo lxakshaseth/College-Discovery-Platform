@@ -10,6 +10,7 @@ import { SaveButton } from "@/components/college/SaveButton";
 import { ReviewSection } from "@/components/college/ReviewSection";
 import { RoiCalculator } from "@/components/college/RoiCalculator";
 import { ShareCollegeButton } from "@/components/college/ShareCollegeButton";
+import { PrintCollegeButton } from "@/components/college/PrintCollegeButton";
 
 export const dynamic = "force-dynamic";
 
@@ -125,6 +126,7 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
 
           <div className="flex items-center gap-2 self-start">
             <ShareCollegeButton collegeName={college.name} />
+            <PrintCollegeButton collegeName={college.name} />
             <SaveButton collegeId={college.id} />
           </div>
         </div>
