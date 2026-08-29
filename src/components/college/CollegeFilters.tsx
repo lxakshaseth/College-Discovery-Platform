@@ -20,6 +20,7 @@ export function CollegeFilters() {
   const [q, setQ] = useState(searchParams.get("q") || "");
   const [state, setState] = useState(searchParams.get("state") || "ALL");
   const [type, setType] = useState(searchParams.get("type") || "ALL");
+  const [maxFees, setMaxFees] = useState(searchParams.get("maxFees") || "ALL");
   const [minRating, setMinRating] = useState(searchParams.get("minRating") || "ALL");
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "rating");
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -29,6 +30,7 @@ export function CollegeFilters() {
     setQ(searchParams.get("q") || "");
     setState(searchParams.get("state") || "ALL");
     setType(searchParams.get("type") || "ALL");
+    setMaxFees(searchParams.get("maxFees") || "ALL");
     setMinRating(searchParams.get("minRating") || "ALL");
     setSortBy(searchParams.get("sortBy") || "rating");
   }, [searchParams]);
@@ -55,6 +57,7 @@ export function CollegeFilters() {
       q: q || null,
       state: state !== "ALL" ? state : null,
       type: type !== "ALL" ? type : null,
+      maxFees: maxFees !== "ALL" ? maxFees : null,
       minRating: minRating !== "ALL" ? minRating : null,
       sortBy: sortBy !== "rating" ? sortBy : null,
     });
@@ -71,6 +74,7 @@ export function CollegeFilters() {
     setQ("");
     setState("ALL");
     setType("ALL");
+    setMaxFees("ALL");
     setMinRating("ALL");
     setSortBy("rating");
     router.push("/colleges");
@@ -146,6 +150,23 @@ export function CollegeFilters() {
             <SelectItem value="PUBLIC">Public / Govt (IIT/NIT)</SelectItem>
             <SelectItem value="PRIVATE">Private Institute</SelectItem>
             <SelectItem value="DEEMED">Deemed University</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Tuition Budget Filter */}
+      <div className="space-y-1.5">
+        <Label className="text-xs text-gray-600 font-semibold">Max Annual Tuition Budget</Label>
+        <Select value={maxFees} onValueChange={(val) => setMaxFees(val)}>
+          <SelectTrigger className="w-full text-sm">
+            <SelectValue placeholder="Any Budget" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">Any Budget</SelectItem>
+            <SelectItem value="100000">Under ₹1 Lakh / yr</SelectItem>
+            <SelectItem value="250000">Under ₹2.5 Lakhs / yr</SelectItem>
+            <SelectItem value="500000">Under ₹5 Lakhs / yr</SelectItem>
+            <SelectItem value="1000000">Under ₹10 Lakhs / yr</SelectItem>
           </SelectContent>
         </Select>
       </div>
