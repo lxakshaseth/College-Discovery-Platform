@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search, Scale, Sparkles, Trophy, GraduationCap, Building2, ArrowRight, ShieldCheck, Star } from "lucide-react";
+import { Search, Scale, Sparkles, Trophy, GraduationCap, Building2, ArrowRight, ShieldCheck, Star, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import { CollegeCard } from "@/components/college/CollegeCard";
@@ -160,6 +160,57 @@ export default async function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {topColleges.map((college) => (
             <CollegeCard key={college.id} college={college} />
+          ))}
+        </div>
+      </section>
+
+      {/* Explore Colleges by State Hubs */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <MapPin className="h-6 w-6 text-blue-600" />
+              Explore Top Colleges by State & Education Hubs
+            </h2>
+            <p className="text-xs text-gray-500 mt-1">Discover premier institutes across major educational states in India</p>
+          </div>
+
+          <Link href="/colleges">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs text-blue-600 border-blue-200 hover:bg-blue-50">
+              All States
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { name: "Maharashtra", icon: "🏛️", sample: "IIT Bombay, ICT, VNIT" },
+            { name: "Delhi", icon: "🏢", sample: "IIT Delhi, DTU, NSUT" },
+            { name: "Karnataka", icon: "💻", sample: "IISc, NITK, RVCE" },
+            { name: "Tamil Nadu", icon: "🎓", sample: "IIT Madras, NIT Trichy, VIT" },
+            { name: "Telangana", icon: "🚀", sample: "IIT Hyderabad, NIT Warangal" },
+            { name: "Uttar Pradesh", icon: "📚", sample: "IIT Kanpur, IIT BHU, MNNIT" },
+            { name: "Rajasthan", icon: "⚡", sample: "BITS Pilani, MNIT Jaipur" },
+            { name: "West Bengal", icon: "🔬", sample: "IIT Kharagpur, IIEST Shibpur" },
+          ].map((st) => (
+            <Link
+              key={st.name}
+              href={`/colleges?state=${encodeURIComponent(st.name)}`}
+              className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-xs hover:border-blue-300 hover:shadow-md transition flex flex-col justify-between"
+            >
+              <div className="space-y-1">
+                <span className="text-2xl block">{st.icon}</span>
+                <h3 className="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition">
+                  {st.name}
+                </h3>
+                <p className="text-[11px] text-slate-500 line-clamp-1">{st.sample}</p>
+              </div>
+
+              <span className="text-xs font-semibold text-blue-600 mt-3 flex items-center gap-1 group-hover:underline">
+                View Institutes <ArrowRight className="h-3 w-3" />
+              </span>
+            </Link>
           ))}
         </div>
       </section>
