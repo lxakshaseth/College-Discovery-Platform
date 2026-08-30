@@ -13,6 +13,10 @@ const INDIAN_STATES = [
   "West Bengal", "Uttar Pradesh", "Punjab", "Rajasthan", "Kerala", "Uttarakhand"
 ];
 
+const ACCEPTED_EXAMS = [
+  "JEE Main", "JEE Advanced", "BITSAT", "GATE", "CAT", "CUET", "MHT CET", "KCET", "WBJEE"
+];
+
 export function CollegeFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,6 +24,7 @@ export function CollegeFilters() {
   const [q, setQ] = useState(searchParams.get("q") || "");
   const [state, setState] = useState(searchParams.get("state") || "ALL");
   const [type, setType] = useState(searchParams.get("type") || "ALL");
+  const [exam, setExam] = useState(searchParams.get("exam") || "ALL");
   const [maxFees, setMaxFees] = useState(searchParams.get("maxFees") || "ALL");
   const [minRating, setMinRating] = useState(searchParams.get("minRating") || "ALL");
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "rating");
@@ -30,6 +35,7 @@ export function CollegeFilters() {
     setQ(searchParams.get("q") || "");
     setState(searchParams.get("state") || "ALL");
     setType(searchParams.get("type") || "ALL");
+    setExam(searchParams.get("exam") || "ALL");
     setMaxFees(searchParams.get("maxFees") || "ALL");
     setMinRating(searchParams.get("minRating") || "ALL");
     setSortBy(searchParams.get("sortBy") || "rating");
@@ -57,6 +63,7 @@ export function CollegeFilters() {
       q: q || null,
       state: state !== "ALL" ? state : null,
       type: type !== "ALL" ? type : null,
+      exam: exam !== "ALL" ? exam : null,
       maxFees: maxFees !== "ALL" ? maxFees : null,
       minRating: minRating !== "ALL" ? minRating : null,
       sortBy: sortBy !== "rating" ? sortBy : null,
@@ -74,6 +81,7 @@ export function CollegeFilters() {
     setQ("");
     setState("ALL");
     setType("ALL");
+    setExam("ALL");
     setMaxFees("ALL");
     setMinRating("ALL");
     setSortBy("rating");
@@ -150,6 +158,24 @@ export function CollegeFilters() {
             <SelectItem value="PUBLIC">Public / Govt (IIT/NIT)</SelectItem>
             <SelectItem value="PRIVATE">Private Institute</SelectItem>
             <SelectItem value="DEEMED">Deemed University</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Entrance Exam Filter */}
+      <div className="space-y-1.5">
+        <Label className="text-xs text-gray-600 font-semibold">Accepted Entrance Exam</Label>
+        <Select value={exam} onValueChange={(val) => setExam(val)}>
+          <SelectTrigger className="w-full text-sm">
+            <SelectValue placeholder="All Exams" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Entrance Exams</SelectItem>
+            {ACCEPTED_EXAMS.map((e) => (
+              <SelectItem key={e} value={e}>
+                {e}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
