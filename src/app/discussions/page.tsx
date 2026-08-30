@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { MessageSquare, Plus, ThumbsUp, Send, User, Building2, Search, CheckCircle2, Sparkles, MessageCircle } from "lucide-react";
+import { MessageSquare, Plus, ThumbsUp, Send, User, Building2, Search, CheckCircle2, Sparkles, MessageCircle, Share2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -66,6 +66,18 @@ export default function DiscussionsPage() {
 
   // Upvoted answers tracking
   const [upvotedAnswers, setUpvotedAnswers] = useState<Record<string, boolean>>({});
+
+  // Question share feedback state
+  const [copiedQuestionId, setCopiedQuestionId] = useState<string | null>(null);
+
+  const handleShareQuestion = (qId: string) => {
+    if (typeof window !== "undefined") {
+      const url = `${window.location.origin}/discussions#q-${qId}`;
+      navigator.clipboard.writeText(url);
+      setCopiedQuestionId(qId);
+      setTimeout(() => setCopiedQuestionId(null), 2000);
+    }
+  };
 
   useEffect(() => {
     fetchQuestions();
@@ -496,7 +508,8 @@ export default function DiscussionsPage() {
           {filteredQuestions.map((q) => (
             <div
               key={q.id}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 hover:border-blue-200 transition"
+              id={`q-${q.id}`}
+              className="scroll-mt-20 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 hover:border-blue-200 transition"
             >
               {/* Question Header */}
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
@@ -529,9 +542,23 @@ export default function DiscussionsPage() {
                   </h3>
                 </div>
 
-                <div className="flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 self-start">
-                  <MessageSquare className="h-3.5 w-3.5" />
-                  {q.answers.length} {q.answers.length === 1 ? "Answer" : "Answers"}
+                <div className="flex items-center gap-2 self-start">
+                  <button
+                    onClick={() => handleShareQuestion(q.id)}
+                    className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition"
+                    title={copiedQuestionId === q.id ? "Link Copied!" : "Copy link to question"}
+                  >
+                    {copiedQuestionId === q.id ? (
+                      <Check className="h-3.5 w-3.5 text-emerald-600" />
+                    ) : (
+                      <Share2 className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+
+                  <div className="flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    {q.answers.length} {q.answers.length === 1 ? "Answer" : "Answers"}
+                  </div>
                 </div>
               </div>
 
