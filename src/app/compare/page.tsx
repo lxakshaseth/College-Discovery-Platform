@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Scale, Plus, Bookmark, RefreshCw, Trash2, ArrowLeft } from "lucide-react";
+import { Scale, Plus, Bookmark, RefreshCw, Trash2, ArrowLeft, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CompareTable } from "@/components/college/CompareTable";
@@ -11,6 +11,13 @@ import { CompareCollege, CollegeListItem } from "@/types";
 import { useCompare } from "@/components/providers/CompareContext";
 import { safeJsonParse } from "@/lib/utils";
 import Link from "next/link";
+
+const POPULAR_MATCHUPS = [
+  { title: "IIT Bombay vs IIT Delhi", query1: "IIT Bombay", query2: "IIT Delhi", desc: "Top 2 NIRF Premier Engineering Institutes" },
+  { title: "IIT Madras vs IIT Kharagpur", query1: "IIT Madras", query2: "IIT Kharagpur", desc: "NIRF #1 vs Oldest Legacy IIT" },
+  { title: "BITS Pilani vs NIT Trichy", query1: "BITS Pilani", query2: "NIT Trichy", desc: "Premier Private vs Top Tier NIT" },
+  { title: "DTU Delhi vs NSUT Delhi", query1: "Delhi Technological", query2: "Netaji Subhas", desc: "Delhi Premier State Engineering Giants" },
+];
 
 function ComparePageContent() {
   const searchParams = useSearchParams();
@@ -185,6 +192,27 @@ function ComparePageContent() {
     document.body.removeChild(link);
   };
 
+  const handleLoadPreset = async (q1: string, q2: string) => {
+    setLoading(true);
+    try {
+      const [res1, res2] = await Promise.all([
+        fetch(`/api/colleges?q=${encodeURIComponent(q1)}&limit=1`),
+        fetch(`/api/colleges?q=${encodeURIComponent(q2)}&limit=1`),
+      ]);
+      const json1 = await res1.json();
+      const json2 = await res2.json();
+      const c1 = json1.data?.[0];
+      const c2 = json2.data?.[0];
+      if (c1 && c2) {
+        router.push(`/compare?ids=${c1.id},${c2.id}`);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Top Banner */}
@@ -302,6 +330,44 @@ function ComparePageContent() {
       ) : (
         <CompareTable colleges={colleges} onRemove={handleRemoveCollege} />
       )}
+
+      {/* Popular Comparison Matchups */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              Popular Head-to-Head Comparisons
+            </h3>
+            <p className="text-xs text-slate-500">
+              Quickly load comparison matrices for top competing universities with 1-click.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {POPULAR_MATCHUPS.map((match) => (
+            <button
+              key={match.title}
+              onClick={() => handleLoadPreset(match.query1, match.query2)}
+              disabled={loading}
+              className="group text-left p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 transition flex flex-col justify-between"
+            >
+              <div className="space-y-1">
+                <span className="font-bold text-xs text-slate-900 group-hover:text-blue-600 transition block">
+                  {match.title}
+                </span>
+                <p className="text-[11px] text-slate-500 line-clamp-1">{match.desc}</p>
+              </div>
+
+              <div className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 mt-2.5">
+                <span>Compare Now</span>
+                <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -14,9 +14,9 @@ export async function GET(req: NextRequest) {
 
     const collegeIds = ids.split(",").map((id) => id.trim()).filter(Boolean);
 
-    if (collegeIds.length < 2 || collegeIds.length > 3) {
+    if (collegeIds.length < 1 || collegeIds.length > 3) {
       return NextResponse.json(
-        { error: "Please provide 2-3 college IDs for comparison" },
+        { error: "Please provide 1 to 3 college IDs for comparison" },
         { status: 400 }
       );
     }
@@ -39,9 +39,9 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    if (colleges.length !== collegeIds.length) {
+    if (colleges.length === 0) {
       return NextResponse.json(
-        { error: "One or more colleges not found" },
+        { error: "No matching colleges found" },
         { status: 404 }
       );
     }
