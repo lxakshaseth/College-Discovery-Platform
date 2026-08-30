@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Trophy, CheckCircle, AlertTriangle, ArrowUpRight, Scale, Check, Filter, Layers, Target, Compass, Download } from "lucide-react";
+import { Sparkles, Trophy, CheckCircle, AlertTriangle, ArrowUpRight, Scale, Check, Filter, Layers, Target, Compass, Download, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,6 +48,7 @@ export default function PredictorPage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<MatchedCollege[] | null>(null);
   const [tierFilter, setTierFilter] = useState<"ALL" | "HIGH" | "MEDIUM" | "LOW">("ALL");
+  const [resultSearchQuery, setResultSearchQuery] = useState("");
 
   const { addToCompare, removeFromCompare, isInCompare, compareList } = useCompare();
 
@@ -94,8 +95,12 @@ export default function PredictorPage() {
   };
 
   const filteredResults = results?.filter((c) => {
-    if (tierFilter === "ALL") return true;
-    return c.matchDetails.admissionChance === tierFilter;
+    const matchesTier = tierFilter === "ALL" || c.matchDetails.admissionChance === tierFilter;
+    const matchesSearch = !resultSearchQuery.trim() ||
+      c.name.toLowerCase().includes(resultSearchQuery.toLowerCase()) ||
+      c.location.toLowerCase().includes(resultSearchQuery.toLowerCase()) ||
+      c.state.toLowerCase().includes(resultSearchQuery.toLowerCase());
+    return matchesTier && matchesSearch;
   });
 
   const highChanceCount = results?.filter((c) => c.matchDetails.admissionChance === "HIGH").length || 0;
@@ -342,6 +347,18 @@ export default function PredictorPage() {
                   <Compass className="h-3 w-3" />
                   Dream ({lowChanceCount})
                 </button>
+              </div>
+
+              {/* In-results Search Input */}
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="Filter colleges, city, state..."
+                  value={resultSearchQuery}
+                  onChange={(e) => setResultSearchQuery(e.target.value)}
+                  className="h-9 pl-8 text-xs bg-white border-slate-200 w-48 sm:w-56"
+                />
               </div>
 
               <Button
