@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatPackage, safeJsonParse } from "@/lib/utils";
-import { Star, MapPin, Building2, Globe, Award, CheckCircle2, TrendingUp, IndianRupee, ArrowLeft, BookOpen, MessageSquare } from "lucide-react";
+import { Star, MapPin, Building2, Globe, Award, CheckCircle2, TrendingUp, IndianRupee, ArrowLeft, BookOpen, MessageSquare, Sparkles, ShieldCheck, GraduationCap, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -212,6 +212,55 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
                 </div>
               </div>
             )}
+
+            {/* Admission Eligibility & Counseling Overview */}
+            <div className="rounded-2xl border border-blue-200 bg-blue-50/40 p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <h4 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <GraduationCap className="h-5 w-5 text-blue-600" />
+                    Admission Eligibility & Counseling Information
+                  </h4>
+                  <p className="text-xs text-slate-600">
+                    Standard admission criteria & counseling authorities for prospective applicants.
+                  </p>
+                </div>
+
+                <Link href="/predictor">
+                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold gap-1.5 shadow-xs">
+                    <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                    Predict Admission Chances
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                <div className="rounded-xl bg-white p-4 border border-blue-100 shadow-xs space-y-1">
+                  <span className="text-[11px] font-semibold uppercase text-slate-500 tracking-wider">Qualifying Board Criteria</span>
+                  <div className="text-sm font-bold text-slate-900">
+                    {college.type === "PUBLIC" ? "75% Aggregate (or Top 20%ile in 10+2)" : "60% Aggregate in 10+2 (PCM/PCB)"}
+                  </div>
+                  <p className="text-[11px] text-slate-500">Class 12th Board Examination</p>
+                </div>
+
+                <div className="rounded-xl bg-white p-4 border border-blue-100 shadow-xs space-y-1">
+                  <span className="text-[11px] font-semibold uppercase text-slate-500 tracking-wider">Counseling Authority</span>
+                  <div className="text-sm font-bold text-slate-900">
+                    {college.type === "PUBLIC" ? "JoSAA / CSAB Rounds" : "Institute Counseling / State DTE"}
+                  </div>
+                  <p className="text-[11px] text-slate-500">Centralized Seat Allocation</p>
+                </div>
+
+                <div className="rounded-xl bg-white p-4 border border-blue-100 shadow-xs space-y-1">
+                  <span className="text-[11px] font-semibold uppercase text-slate-500 tracking-wider">Accepted Exams</span>
+                  <div className="text-sm font-bold text-blue-700 line-clamp-1">
+                    {examsAccepted.length > 0 ? examsAccepted.join(", ") : "National / State CET"}
+                  </div>
+                  <p className="text-[11px] text-slate-500">Entrance Test Merit Ranking</p>
+                </div>
+              </div>
+            </div>
 
             {/* Campus Facilities & Infrastructure */}
             <div className="space-y-3">
