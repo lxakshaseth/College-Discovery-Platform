@@ -17,49 +17,74 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
+      setSelectedIndex(0);
     } else {
       setQuery("");
       setResults([]);
+      setSelectedIndex(0);
     }
   }, [isOpen]);
 
-  // Handle Ctrl+K / Cmd+K global hotkey
+  // Handle keyboard hotkeys and arrow navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         if (isOpen) {
           onClose();
-        } else {
-          // Open
         }
       }
       if (e.key === "Escape" && isOpen) {
         onClose();
       }
+      if (!isOpen) return;
+
+      const totalItems = query.trim() ? results.length : 4;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev + 1) % Math.max(1, totalItems));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev - 1 + Math.max(1, totalItems)) % Math.max(1, totalItems));
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (query.trim() && results[selectedIndex]) {
+          navigateTo(`/colleges/${results[selectedIndex].slug}`);
+        } else if (!query.trim()) {
+          const quickPaths = ["/predictor", "/compare", "/discussions", "/saved"];
+          if (quickPaths[selectedIndex]) {
+            navigateTo(quickPaths[selectedIndex]);
+          }
+        }
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, query, results, selectedIndex]);
 
   // Live search query
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
+      setSelectedIndex(0);
       return;
     }
 
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/colleges?search=${encodeURIComponent(query)}&limit=6`);
+        const res = await fetch(`/api/colleges?q=${encodeURIComponent(query)}&limit=6`);
         if (res.ok) {
           const json = await res.json();
           setResults(json.data || []);
+          setSelectedIndex(0);
         }
       } catch (err) {
         console.error("Search error:", err);
@@ -121,11 +146,13 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                   No colleges found for "{query}". Try searching by state or initials.
                 </div>
               ) : (
-                results.map((c) => (
+                results.map((c, idx) => (
                   <button
                     key={c.id}
                     onClick={() => navigateTo(`/colleges/${c.slug}`)}
-                    className="w-full p-2.5 rounded-xl text-left hover:bg-blue-50 transition flex items-center justify-between group"
+                    className={`w-full p-2.5 rounded-xl text-left transition flex items-center justify-between group ${
+                      selectedIndex === idx ? "bg-blue-50/80 border border-blue-200 font-semibold" : "hover:bg-slate-50"
+                    }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg bg-blue-100 text-blue-700 font-bold text-xs">
@@ -153,7 +180,9 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
               <div className="space-y-1">
                 <button
                   onClick={() => navigateTo("/predictor")}
-                  className="w-full p-2.5 rounded-xl text-left hover:bg-amber-50 transition flex items-center justify-between group"
+                  className={`w-full p-2.5 rounded-xl text-left transition flex items-center justify-between group ${
+                    selectedIndex === 0 ? "bg-amber-50 border border-amber-200" : "hover:bg-slate-50"
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-amber-100 text-amber-700">
@@ -171,7 +200,9 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
                 <button
                   onClick={() => navigateTo("/compare")}
-                  className="w-full p-2.5 rounded-xl text-left hover:bg-blue-50 transition flex items-center justify-between group"
+                  className={`w-full p-2.5 rounded-xl text-left transition flex items-center justify-between group ${
+                    selectedIndex === 1 ? "bg-blue-50 border border-blue-200" : "hover:bg-slate-50"
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-blue-100 text-blue-700">
@@ -189,7 +220,9 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
                 <button
                   onClick={() => navigateTo("/discussions")}
-                  className="w-full p-2.5 rounded-xl text-left hover:bg-purple-50 transition flex items-center justify-between group"
+                  className={`w-full p-2.5 rounded-xl text-left transition flex items-center justify-between group ${
+                    selectedIndex === 2 ? "bg-purple-50 border border-purple-200" : "hover:bg-slate-50"
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-purple-100 text-purple-700">
@@ -207,7 +240,9 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
 
                 <button
                   onClick={() => navigateTo("/saved")}
-                  className="w-full p-2.5 rounded-xl text-left hover:bg-slate-100 transition flex items-center justify-between group"
+                  className={`w-full p-2.5 rounded-xl text-left transition flex items-center justify-between group ${
+                    selectedIndex === 3 ? "bg-slate-100 border border-slate-300" : "hover:bg-slate-50"
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-slate-100 text-slate-700">
@@ -223,6 +258,16 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Footer shortcuts hint bar */}
+        <div className="bg-slate-50 px-4 py-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="flex items-center gap-3">
+            <span><kbd className="font-semibold text-slate-600 bg-white border border-slate-200 px-1.5 py-0.5 rounded">↑↓</kbd> navigate</span>
+            <span><kbd className="font-semibold text-slate-600 bg-white border border-slate-200 px-1.5 py-0.5 rounded">↵</kbd> select</span>
+            <span><kbd className="font-semibold text-slate-600 bg-white border border-slate-200 px-1.5 py-0.5 rounded">esc</kbd> close</span>
+          </div>
+          <span className="font-medium text-blue-600">CampusPulse Search</span>
         </div>
       </div>
     </div>
