@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Bookmark, Scale, Trash2, ArrowUpRight, GraduationCap, Lock, Download } from "lucide-react";
+import { Bookmark, Scale, Trash2, ArrowUpRight, GraduationCap, Lock, Download, Share2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CollegeCard } from "@/components/college/CollegeCard";
 import { SavedCollegeWithCollege } from "@/types";
 import { formatCurrency, formatPackage } from "@/lib/utils";
@@ -15,6 +16,8 @@ export default function SavedPage() {
   const [savedColleges, setSavedColleges] = useState<SavedCollegeWithCollege[]>([]);
   const [savedComparisons, setSavedComparisons] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [wishlistSort, setWishlistSort] = useState<"recent" | "ranking" | "fees" | "rating">("recent");
+  const [copiedComparisonId, setCopiedComparisonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const exportWishlistCSV = () => {
@@ -66,6 +69,21 @@ export default function SavedPage() {
     );
   });
 
+  const sortedAndFilteredWishlist = [...filteredSavedColleges].sort((a, b) => {
+    if (wishlistSort === "ranking") {
+      const rankA = a.college.ranking || 9999;
+      const rankB = b.college.ranking || 9999;
+      return rankA - rankB;
+    }
+    if (wishlistSort === "fees") {
+      return (a.college.minFees || 0) - (b.college.minFees || 0);
+    }
+    if (wishlistSort === "rating") {
+      return (b.college.rating || 0) - (a.college.rating || 0);
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
   useEffect(() => {
     if (status !== "authenticated") {
       setLoading(false);
@@ -98,6 +116,15 @@ export default function SavedPage() {
 
     fetchSavedData();
   }, [status]);
+
+  const handleShareComparison = (comp: any) => {
+    if (typeof window !== "undefined") {
+      const url = `${window.location.origin}/compare?ids=${comp.collegeIds.join(",")}`;
+      navigator.clipboard.writeText(url);
+      setCopiedComparisonId(comp.id);
+      setTimeout(() => setCopiedComparisonId(null), 2000);
+    }
+  };
 
   const handleDeleteComparison = async (id: string) => {
     try {
@@ -170,17 +197,31 @@ export default function SavedPage() {
                   placeholder="Filter saved colleges by name or city..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:w-80 px-3 py-1.5 text-sm rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full sm:w-72 px-3 py-1.5 text-sm rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                  <span className="text-xs text-gray-500 font-medium whitespace-nowrap">
-                    Showing {filteredSavedColleges.length} of {savedColleges.length} saved colleges
-                  </span>
+
+                <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
+                  {/* Sort Wishlist Selector */}
+                  <Select
+                    value={wishlistSort}
+                    onValueChange={(val: any) => setWishlistSort(val)}
+                  >
+                    <SelectTrigger className="h-9 w-44 text-xs bg-white border-gray-200">
+                      <SelectValue placeholder="Sort wishlist" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Recently Shortlisted</SelectItem>
+                      <SelectItem value="ranking">NIRF Rank (Top First)</SelectItem>
+                      <SelectItem value="fees">Lowest Tuition Fees</SelectItem>
+                      <SelectItem value="rating">Highest Rating</SelectItem>
+                    </SelectContent>
+                  </Select>
+
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={exportWishlistCSV}
-                    className="text-xs font-semibold gap-1.5 border-gray-200 text-gray-700 hover:bg-gray-50 shrink-0"
+                    className="text-xs font-semibold gap-1.5 border-gray-200 text-gray-700 hover:bg-gray-50 shrink-0 h-9"
                     title="Export your shortlisted colleges as CSV spreadsheet"
                   >
                     <Download className="h-3.5 w-3.5 text-gray-500" />
@@ -201,13 +242,13 @@ export default function SavedPage() {
                   </Button>
                 </Link>
               </div>
-            ) : filteredSavedColleges.length === 0 ? (
+            ) : sortedAndFilteredWishlist.length === 0 ? (
               <div className="p-8 text-center bg-white rounded-xl border border-gray-200 text-sm text-gray-500">
                 No saved colleges match "{searchQuery}"
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredSavedColleges.map((item) => (
+                {sortedAndFilteredWishlist.map((item) => (
                   <CollegeCard key={item.id} college={item.college as any} />
                 ))}
               </div>
@@ -239,13 +280,26 @@ export default function SavedPage() {
                         <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
                           Saved Comparison
                         </span>
-                        <button
-                          onClick={() => handleDeleteComparison(comp.id)}
-                          className="text-gray-400 hover:text-red-600 transition"
-                          title="Delete comparison"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleShareComparison(comp)}
+                            className="p-1 text-gray-400 hover:text-blue-600 transition"
+                            title={copiedComparisonId === comp.id ? "Link Copied!" : "Copy comparison link"}
+                          >
+                            {copiedComparisonId === comp.id ? (
+                              <Check className="h-4 w-4 text-emerald-600" />
+                            ) : (
+                              <Share2 className="h-4 w-4" />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteComparison(comp.id)}
+                            className="p-1 text-gray-400 hover:text-red-600 transition"
+                            title="Delete comparison"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
 
                       <h3 className="font-bold text-base text-gray-900">{comp.name}</h3>
