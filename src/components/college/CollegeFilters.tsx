@@ -2,11 +2,12 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
-import { Search, Filter, RotateCcw, SlidersHorizontal } from "lucide-react";
+import { Search, Filter, RotateCcw, SlidersHorizontal, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 const INDIAN_STATES = [
   "Maharashtra", "Delhi", "Tamil Nadu", "Karnataka", "Telangana",
@@ -77,6 +78,31 @@ export function CollegeFilters() {
     applyFilters();
   };
 
+  const activeFilterCount = [
+    q.trim() !== "",
+    state !== "ALL",
+    type !== "ALL",
+    exam !== "ALL",
+    maxFees !== "ALL",
+    minRating !== "ALL",
+    sortBy !== "rating",
+  ].filter(Boolean).length;
+
+  const removeSingleFilter = (key: string) => {
+    if (key === "q") setQ("");
+    if (key === "state") setState("ALL");
+    if (key === "type") setType("ALL");
+    if (key === "exam") setExam("ALL");
+    if (key === "maxFees") setMaxFees("ALL");
+    if (key === "minRating") setMinRating("ALL");
+    if (key === "sortBy") setSortBy("rating");
+
+    const query = createQueryString({
+      [key]: null,
+    });
+    router.push(`/colleges?${query}`);
+  };
+
   const clearAllFilters = () => {
     setQ("");
     setState("ALL");
@@ -90,7 +116,7 @@ export function CollegeFilters() {
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-6">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-5">
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
         <button
           onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
@@ -98,20 +124,89 @@ export function CollegeFilters() {
         >
           <Filter className="h-4 w-4 text-blue-600" />
           <span>Filter & Search</span>
+          {activeFilterCount > 0 && (
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-[10px] font-bold px-1.5 py-0.5">
+              {activeFilterCount}
+            </Badge>
+          )}
           <span className="lg:hidden text-xs font-normal text-blue-600 ml-1">
             ({mobileFilterOpen ? "Hide" : "Show"})
           </span>
         </button>
-        <button
-          onClick={clearAllFilters}
-          className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
-        >
-          <RotateCcw className="h-3 w-3" />
-          Reset
-        </button>
+        {activeFilterCount > 0 && (
+          <button
+            onClick={clearAllFilters}
+            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
+          >
+            <RotateCcw className="h-3 w-3" />
+            Reset
+          </button>
+        )}
       </div>
 
-      <div className={`${mobileFilterOpen ? "block" : "hidden"} lg:block space-y-6`}>
+      {/* Active Filter Tags */}
+      {activeFilterCount > 0 && (
+        <div className="flex flex-wrap gap-1.5 pb-2 border-b border-slate-100">
+          {q.trim() && (
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[11px] gap-1 py-0.5">
+              <span>"{q}"</span>
+              <button onClick={() => removeSingleFilter("q")}>
+                <X className="h-3 w-3 hover:text-red-600" />
+              </button>
+            </Badge>
+          )}
+          {state !== "ALL" && (
+            <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-200 text-[11px] gap-1 py-0.5">
+              <span>{state}</span>
+              <button onClick={() => removeSingleFilter("state")}>
+                <X className="h-3 w-3 hover:text-red-600" />
+              </button>
+            </Badge>
+          )}
+          {type !== "ALL" && (
+            <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-200 text-[11px] gap-1 py-0.5">
+              <span>{type}</span>
+              <button onClick={() => removeSingleFilter("type")}>
+                <X className="h-3 w-3 hover:text-red-600" />
+              </button>
+            </Badge>
+          )}
+          {exam !== "ALL" && (
+            <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-200 text-[11px] gap-1 py-0.5">
+              <span>{exam}</span>
+              <button onClick={() => removeSingleFilter("exam")}>
+                <X className="h-3 w-3 hover:text-red-600" />
+              </button>
+            </Badge>
+          )}
+          {maxFees !== "ALL" && (
+            <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-200 text-[11px] gap-1 py-0.5">
+              <span>Under ₹{parseInt(maxFees) / 100000}L</span>
+              <button onClick={() => removeSingleFilter("maxFees")}>
+                <X className="h-3 w-3 hover:text-red-600" />
+              </button>
+            </Badge>
+          )}
+          {minRating !== "ALL" && (
+            <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-200 text-[11px] gap-1 py-0.5">
+              <span>{minRating}★+</span>
+              <button onClick={() => removeSingleFilter("minRating")}>
+                <X className="h-3 w-3 hover:text-red-600" />
+              </button>
+            </Badge>
+          )}
+          {sortBy !== "rating" && (
+            <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-200 text-[11px] gap-1 py-0.5">
+              <span>Sort: {sortBy}</span>
+              <button onClick={() => removeSingleFilter("sortBy")}>
+                <X className="h-3 w-3 hover:text-red-600" />
+              </button>
+            </Badge>
+          )}
+        </div>
+      )}
+
+      <div className={`${mobileFilterOpen ? "block" : "hidden"} lg:block space-y-5`}>
 
       {/* Search Input */}
       <form onSubmit={handleSearchSubmit} className="space-y-1.5">
