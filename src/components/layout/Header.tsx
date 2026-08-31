@@ -155,7 +155,43 @@ export function Header() {
             })}
           </nav>
 
-          {!session?.user && (
+          {/* Quick Search in Mobile Dropdown */}
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              setPaletteOpen(true);
+            }}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 text-xs font-medium"
+          >
+            <div className="flex items-center gap-2">
+              <Search className="h-3.5 w-3.5 text-slate-400" />
+              <span>Search colleges, predictors...</span>
+            </div>
+            <kbd className="px-1.5 py-0.5 text-[10px] font-semibold bg-white border border-slate-300 rounded text-slate-500">
+              ⌘K
+            </kbd>
+          </button>
+
+          {session?.user ? (
+            <div className="pt-3 border-t border-slate-100 space-y-2">
+              <div className="flex items-center gap-2 px-1 text-xs text-slate-600 font-medium">
+                <User className="h-4 w-4 text-blue-600" />
+                <span>Signed in as <strong className="text-slate-900">{session.user.name || session.user.email}</strong></span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  signOut();
+                }}
+                className="w-full gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span>Logout Account</span>
+              </Button>
+            </div>
+          ) : (
             <div className="pt-3 border-t border-slate-100 flex gap-2">
               <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="flex-1">
                 <Button variant="outline" size="sm" className="w-full font-medium text-slate-700">
