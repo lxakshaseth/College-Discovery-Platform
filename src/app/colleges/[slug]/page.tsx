@@ -11,6 +11,7 @@ import { ReviewSection } from "@/components/college/ReviewSection";
 import { RoiCalculator } from "@/components/college/RoiCalculator";
 import { ShareCollegeButton } from "@/components/college/ShareCollegeButton";
 import { PrintCollegeButton } from "@/components/college/PrintCollegeButton";
+import { AddToCompareDetailButton } from "@/components/college/AddToCompareDetailButton";
 
 export const dynamic = "force-dynamic";
 
@@ -124,7 +125,8 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start">
+          <div className="flex flex-wrap items-center gap-2 self-start">
+            <AddToCompareDetailButton college={college} />
             <ShareCollegeButton collegeName={college.name} />
             <PrintCollegeButton collegeName={college.name} />
             <SaveButton collegeId={college.id} />
@@ -300,21 +302,33 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
                   <th className="p-3.5">Degree Level</th>
                   <th className="p-3.5">Duration</th>
                   <th className="p-3.5">Annual Tuition Fees</th>
+                  <th className="p-3.5">Total Estimated Fees</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
-                {college.courses?.map((course: any) => (
-                  <tr key={course.id} className="hover:bg-blue-50/40 transition">
-                    <td className="p-3.5 font-bold text-slate-900">{course.name}</td>
-                    <td className="p-3.5">
-                      <Badge variant="outline" className="text-xs font-semibold">
-                        {course.type}
-                      </Badge>
-                    </td>
-                    <td className="p-3.5 text-slate-600">{course.duration}</td>
-                    <td className="p-3.5 font-bold text-slate-900">{formatCurrency(course.fees)} / yr</td>
-                  </tr>
-                ))}
+                {college.courses?.map((course: any) => {
+                  const durationYears = parseInt(course.duration) || (course.type === "UG" ? 4 : 2);
+                  const totalEstimatedFees = course.fees * durationYears;
+
+                  return (
+                    <tr key={course.id} className="hover:bg-blue-50/40 transition">
+                      <td className="p-3.5 font-bold text-slate-900">{course.name}</td>
+                      <td className="p-3.5">
+                        <Badge variant="outline" className="text-xs font-semibold">
+                          {course.type}
+                        </Badge>
+                      </td>
+                      <td className="p-3.5 text-slate-600">{course.duration}</td>
+                      <td className="p-3.5 font-bold text-slate-900">{formatCurrency(course.fees)} / yr</td>
+                      <td className="p-3.5 font-bold text-blue-700">
+                        {formatCurrency(totalEstimatedFees)}
+                        <span className="text-[11px] font-normal text-slate-400 block">
+                          ({durationYears} yrs program)
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
