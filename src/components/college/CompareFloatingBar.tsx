@@ -11,7 +11,7 @@ export function CompareFloatingBar() {
   if (compareList.length === 0) return null;
 
   return (
-    <div className="no-print fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-3xl rounded-2xl border border-gray-800 bg-gray-900/95 p-4 text-white shadow-2xl backdrop-blur-md">
+    <div className="no-print fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-3xl rounded-2xl border border-gray-800 bg-gray-900/95 p-4 text-white shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom-5 duration-200">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Selected Colleges chips */}
         <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
@@ -48,25 +48,15 @@ export function CompareFloatingBar() {
             Clear
           </Button>
 
-          {compareList.length >= 2 ? (
-            <Link href={`/compare?ids=${compareList.map((c) => c.id).join(",")}`}>
-              <Button
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 gap-1.5 shadow-md"
-              >
-                Compare Side-by-Side
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
-            </Link>
-          ) : (
+          <Link href={`/compare?ids=${compareList.map((c) => c.id).join(",")}`}>
             <Button
               size="sm"
-              disabled
-              className="bg-slate-700 text-slate-400 text-xs font-semibold px-4 gap-1.5 cursor-not-allowed opacity-60"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 gap-1.5 shadow-md"
             >
-              Add 1 more to Compare
+              {compareList.length >= 2 ? "Compare Side-by-Side" : "Open Compare Matrix"}
+              <ArrowRight className="h-3.5 w-3.5" />
             </Button>
-          )}
+          </Link>
         </div>
       </div>
     </div>
