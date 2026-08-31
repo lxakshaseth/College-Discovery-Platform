@@ -215,6 +215,51 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Explore Colleges by Entrance Exams */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <GraduationCap className="h-6 w-6 text-amber-500" />
+              Find Colleges by Accepted Entrance Exams
+            </h2>
+            <p className="text-xs text-gray-500 mt-1">Direct pathways to top engineering, management, and science institutions</p>
+          </div>
+
+          <Link href="/colleges">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs text-blue-600 border-blue-200 hover:bg-blue-50">
+              All Exams
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[
+            { name: "JEE Main", count: "NITs, IIITs, GFTIs", color: "bg-blue-50 text-blue-700 border-blue-200" },
+            { name: "JEE Advanced", count: "23 IIT Campuses", color: "bg-amber-50 text-amber-800 border-amber-200" },
+            { name: "BITSAT", count: "BITS Pilani, Goa, Hyd", color: "bg-emerald-50 text-emerald-800 border-emerald-200" },
+            { name: "GATE", count: "M.Tech & PSU Streams", color: "bg-purple-50 text-purple-800 border-purple-200" },
+            { name: "CAT", count: "IIMs & Top B-Schools", color: "bg-rose-50 text-rose-800 border-rose-200" },
+            { name: "MHT CET", count: "COEP, VJTI, SPIT", color: "bg-indigo-50 text-indigo-800 border-indigo-200" },
+          ].map((item) => (
+            <Link
+              key={item.name}
+              href={`/colleges?exam=${encodeURIComponent(item.name)}`}
+              className={`p-3.5 rounded-2xl border transition hover:shadow-md flex flex-col justify-between ${item.color}`}
+            >
+              <div>
+                <span className="font-bold text-xs block">{item.name}</span>
+                <span className="text-[11px] opacity-80 mt-0.5 block line-clamp-1">{item.count}</span>
+              </div>
+              <span className="text-[11px] font-semibold flex items-center gap-1 mt-2.5">
+                Explore <ArrowRight className="h-2.5 w-2.5" />
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Rank Predictor Banner CTA */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="rounded-3xl bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 p-8 sm:p-12 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
