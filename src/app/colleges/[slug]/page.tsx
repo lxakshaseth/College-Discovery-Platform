@@ -12,6 +12,7 @@ import { RoiCalculator } from "@/components/college/RoiCalculator";
 import { ShareCollegeButton } from "@/components/college/ShareCollegeButton";
 import { PrintCollegeButton } from "@/components/college/PrintCollegeButton";
 import { AddToCompareDetailButton } from "@/components/college/AddToCompareDetailButton";
+import { CollegeCard } from "@/components/college/CollegeCard";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
   const { slug } = await params;
 
   let college: any = null;
+  let similarColleges: any[] = [];
 
   try {
     college = await prisma.college.findUnique({
@@ -49,6 +51,24 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
         _count: { select: { reviews: true, savedBy: true, questions: true } },
       },
     });
+
+    if (college) {
+      similarColleges = await prisma.college.findMany({
+        where: {
+          id: { not: college.id },
+          OR: [
+            { state: college.state },
+            { type: college.type },
+          ],
+        },
+        take: 3,
+        orderBy: { rating: "desc" },
+        include: {
+          placements: { take: 1, orderBy: { year: "desc" } },
+          _count: { select: { reviews: true, courses: true } },
+        },
+      });
+    }
   } catch (e) {
     console.warn("DB notice during build/init", e);
   }
@@ -455,6 +475,36 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Similar Institutions You May Consider */}
+      {similarColleges.length > 0 && (
+        <section className="pt-4 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-amber-500" />
+                Similar Institutions You May Consider
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Top rated peer colleges in {college.state} and similar academic streams
+              </p>
+            </div>
+
+            <Link href={`/colleges?state=${encodeURIComponent(college.state)}`}>
+              <Button variant="outline" size="sm" className="text-xs text-blue-600 border-blue-200 hover:bg-blue-50 gap-1">
+                More in {college.state}
+                <ArrowRight className="h-3 w-3" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {similarColleges.map((simCollege) => (
+              <CollegeCard key={simCollege.id} college={simCollege} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
