@@ -7,21 +7,21 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Col 1 */}
-          <div className="space-y-4 md:col-span-2">
+          <div className="space-y-4 md:col-span-1">
             <div className="flex items-center gap-2 font-bold text-xl text-white">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
                 <GraduationCap className="h-5 w-5" />
               </div>
               <span>CampusPulse</span>
             </div>
-            <p className="text-sm text-gray-400 max-w-sm">
+            <p className="text-sm text-gray-400 max-w-sm leading-relaxed">
               India's premier college discovery, side-by-side comparison, and admission rank prediction platform. Helping students make confident career decisions.
             </p>
           </div>
 
           {/* Col 2 */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Discovery Tools</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Discovery Tools</h4>
             <ul className="space-y-2.5 text-sm">
               <li>
                 <Link href="/colleges" className="hover:text-white transition">Search Colleges</Link>
@@ -43,25 +43,50 @@ export function Footer() {
 
           {/* Col 3 */}
           <div>
-            <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Popular Hubs</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Popular Hubs</h4>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <Link href="/colleges?sortBy=ranking" className="hover:text-white transition">Top NIRF Ranked Colleges</Link>
+                <Link href="/colleges?sortBy=ranking" className="hover:text-white transition">Top NIRF Ranked</Link>
               </li>
               <li>
                 <Link href="/colleges?type=PUBLIC" className="hover:text-white transition">Government IITs & NITs</Link>
               </li>
               <li>
-                <Link href="/colleges?type=PRIVATE" className="hover:text-white transition">Private & Deemed Universities</Link>
+                <Link href="/colleges?type=PRIVATE" className="hover:text-white transition">Private & Deemed</Link>
               </li>
               <li>
-                <Link href="/colleges?state=Maharashtra" className="hover:text-white transition">Colleges in Maharashtra</Link>
+                <Link href="/colleges?state=Maharashtra" className="hover:text-white transition">Maharashtra Colleges</Link>
               </li>
               <li>
-                <Link href="/colleges?state=Karnataka" className="hover:text-white transition">Colleges in Karnataka</Link>
+                <Link href="/colleges?state=Karnataka" className="hover:text-white transition">Karnataka Colleges</Link>
               </li>
               <li>
-                <Link href="/colleges?state=Delhi" className="hover:text-white transition">Colleges in Delhi NCR</Link>
+                <Link href="/colleges?state=Delhi" className="hover:text-white transition">Delhi NCR Colleges</Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 4 */}
+          <div>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Exam Pathways</h4>
+            <ul className="space-y-2.5 text-sm">
+              <li>
+                <Link href="/colleges?exam=JEE+Main" className="hover:text-white transition">JEE Main Institutes</Link>
+              </li>
+              <li>
+                <Link href="/colleges?exam=JEE+Advanced" className="hover:text-white transition">JEE Advanced (IITs)</Link>
+              </li>
+              <li>
+                <Link href="/colleges?exam=BITSAT" className="hover:text-white transition">BITSAT Campuses</Link>
+              </li>
+              <li>
+                <Link href="/colleges?exam=GATE" className="hover:text-white transition">GATE M.Tech Programs</Link>
+              </li>
+              <li>
+                <Link href="/colleges?exam=CAT" className="hover:text-white transition">CAT MBA Colleges</Link>
+              </li>
+              <li>
+                <Link href="/colleges?exam=MHT+CET" className="hover:text-white transition">MHT CET Engineering</Link>
               </li>
             </ul>
           </div>
