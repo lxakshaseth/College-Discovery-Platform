@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LayoutGrid, TableProperties, Star, MapPin, IndianRupee, ArrowUpRight, Scale, Check, Award, Building2 } from "lucide-react";
+import { LayoutGrid, TableProperties, Star, MapPin, IndianRupee, ArrowUpRight, Scale, Check, Award, Building2, Download } from "lucide-react";
 import { CollegeListItem } from "@/types";
 import { CollegeCard } from "./CollegeCard";
 import { formatCurrency, formatPackage } from "@/lib/utils";
@@ -19,6 +19,43 @@ interface CollegeListContainerProps {
 export function CollegeListContainer({ colleges, total }: CollegeListContainerProps) {
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const { addToCompare, removeFromCompare, isInCompare, compareList } = useCompare();
+
+  const exportCollegesCSV = () => {
+    if (typeof window === "undefined" || colleges.length === 0) return;
+
+    const headers = [
+      "NIRF Rank",
+      "College Name",
+      "Location",
+      "State",
+      "Type",
+      "Annual Tuition Fees",
+      "Avg Placement CTC",
+      "Rating",
+    ];
+
+    const rows = colleges.map((c) => [
+      `"${c.ranking ? `#${c.ranking}` : "N/A"}"`,
+      `"${c.name.replace(/"/g, '""')}"`,
+      `"${c.location}"`,
+      `"${c.state}"`,
+      `"${c.type}"`,
+      `"${formatCurrency(c.minFees)}"`,
+      `"${c.placements?.[0] ? formatPackage(c.placements[0].averagePackage) : "N/A"}"`,
+      `"${c.rating.toFixed(1)}"`,
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `colleges_page_data_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   const handleCompareClick = (college: CollegeListItem) => {
     if (isInCompare(college.id)) {
@@ -48,43 +85,59 @@ export function CollegeListContainer({ colleges, total }: CollegeListContainerPr
           <Link href="/colleges?q=NIT" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 transition">
             NITs
           </Link>
-          <Link href="/colleges?type=PUBLIC" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 transition">
-            Govt Funded
+          <Link href="/colleges?exam=JEE+Advanced" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-50 hover:text-amber-800 transition">
+            JEE Adv
           </Link>
-          <Link href="/colleges?type=PRIVATE" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 transition">
-            Private / Deemed
+          <Link href="/colleges?exam=BITSAT" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 transition">
+            BITSAT
+          </Link>
+          <Link href="/colleges?type=PUBLIC" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 transition">
+            Govt
           </Link>
           <Link href="/colleges?minRating=4.5" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 transition">
-            ★ 4.5+ Rating
+            ★ 4.5+
           </Link>
         </div>
 
-        {/* View Switcher Toggle */}
-        <div className="flex items-center gap-1 border border-slate-200 rounded-lg p-0.5 bg-slate-50 self-end sm:self-auto">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`p-1.5 rounded-md text-xs font-semibold flex items-center gap-1 transition ${
-              viewMode === "grid"
-                ? "bg-white text-blue-600 shadow-sm"
-                : "text-slate-500 hover:text-slate-900"
-            }`}
-            title="Card Grid View"
+        {/* View Switcher & Export Controls */}
+        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportCollegesCSV}
+            className="h-8 text-xs font-semibold gap-1 border-slate-200 text-slate-700 hover:bg-slate-50"
+            title="Download current page college list as CSV spreadsheet"
           >
-            <LayoutGrid className="h-4 w-4" />
-            <span className="hidden md:inline">Grid</span>
-          </button>
-          <button
-            onClick={() => setViewMode("table")}
-            className={`p-1.5 rounded-md text-xs font-semibold flex items-center gap-1 transition ${
-              viewMode === "table"
-                ? "bg-white text-blue-600 shadow-sm"
-                : "text-slate-500 hover:text-slate-900"
-            }`}
-            title="Comparison Matrix Table View"
-          >
-            <TableProperties className="h-4 w-4" />
-            <span className="hidden md:inline">Table</span>
-          </button>
+            <Download className="h-3.5 w-3.5 text-slate-500" />
+            <span className="hidden sm:inline">Export</span>
+          </Button>
+
+          <div className="flex items-center gap-1 border border-slate-200 rounded-lg p-0.5 bg-slate-50">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-1.5 rounded-md text-xs font-semibold flex items-center gap-1 transition ${
+                viewMode === "grid"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-slate-500 hover:text-slate-900"
+              }`}
+              title="Card Grid View"
+            >
+              <LayoutGrid className="h-4 w-4" />
+              <span className="hidden md:inline">Grid</span>
+            </button>
+            <button
+              onClick={() => setViewMode("table")}
+              className={`p-1.5 rounded-md text-xs font-semibold flex items-center gap-1 transition ${
+                viewMode === "table"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-slate-500 hover:text-slate-900"
+              }`}
+              title="Comparison Matrix Table View"
+            >
+              <TableProperties className="h-4 w-4" />
+              <span className="hidden md:inline">Table</span>
+            </button>
+          </div>
         </div>
       </div>
 
