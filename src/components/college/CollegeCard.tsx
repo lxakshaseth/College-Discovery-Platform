@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Star, MapPin, IndianRupee, Award, ArrowUpRight, Scale, Check, Building2, Share2, BookOpen } from "lucide-react";
 import { CollegeListItem } from "@/types";
-import { formatCurrency, formatPackage } from "@/lib/utils";
+import { formatCurrency, formatPackage, safeJsonParse } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCompare } from "@/components/providers/CompareContext";
@@ -18,6 +18,7 @@ export function CollegeCard({ college }: CollegeCardProps) {
   const { addToCompare, removeFromCompare, isInCompare, compareList } = useCompare();
   const [linkCopied, setLinkCopied] = useState(false);
 
+  const exams: string[] = safeJsonParse<string[]>(college.examsAccepted, []);
   const isComparing = isInCompare(college.id);
 
   const handleQuickShare = (e: React.MouseEvent) => {
@@ -104,7 +105,7 @@ export function CollegeCard({ college }: CollegeCardProps) {
         </Link>
 
         {/* Location & Established */}
-        <div className="flex flex-wrap items-center gap-2.5 text-xs text-gray-500 mb-4">
+        <div className="flex flex-wrap items-center gap-2.5 text-xs text-gray-500 mb-2.5">
           <span className="flex items-center gap-1">
             <MapPin className="h-3.5 w-3.5 text-gray-400" />
             {college.location}, {college.state}
@@ -124,6 +125,24 @@ export function CollegeCard({ college }: CollegeCardProps) {
             </>
           ) : null}
         </div>
+
+        {/* Accepted Entrance Exams Badges */}
+        {exams.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-1.5 mb-3.5">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Exams:</span>
+            {exams.slice(0, 3).map((examItem, idx) => (
+              <span
+                key={idx}
+                className="bg-blue-50 text-blue-700 border border-blue-100 text-[10px] font-semibold px-2 py-0.5 rounded"
+              >
+                {examItem}
+              </span>
+            ))}
+            {exams.length > 3 ? (
+              <span className="text-[10px] text-slate-400 font-medium">+{exams.length - 3}</span>
+            ) : null}
+          </div>
+        ) : null}
 
         {/* Metrics Grid: Fees, Rating & Avg CTC */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100 mb-4">
