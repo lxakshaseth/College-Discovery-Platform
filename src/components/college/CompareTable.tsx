@@ -357,6 +357,56 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
               ))}
             </tr>
 
+            {/* Entrance Exams Accepted */}
+            <tr>
+              <td className="p-4 font-bold text-slate-700 bg-slate-50/50">Entrance Exams Accepted</td>
+              {colleges.map((c) => {
+                const exams = safeJsonParse<string[]>(c.examsAccepted, []);
+                return (
+                  <td key={c.id} className="p-4 text-center border-l border-slate-200">
+                    <div className="flex flex-wrap justify-center gap-1">
+                      {exams.length > 0 ? (
+                        exams.map((exam: string, idx: number) => (
+                          <span
+                            key={idx}
+                            className="rounded-md bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 text-[11px] font-semibold"
+                          >
+                            {exam}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-slate-400 text-xs">Merit / Direct</span>
+                      )}
+                    </div>
+                  </td>
+                );
+              })}
+            </tr>
+
+            {/* Campus Facilities */}
+            <tr>
+              <td className="p-4 font-bold text-slate-700 bg-slate-50/50">Campus Amenities & Facilities</td>
+              {colleges.map((c) => {
+                const facilities = safeJsonParse<string[]>(c.facilities, [
+                  "Wi-Fi Campus", "Hostels", "Central Library", "Sports Complex"
+                ]);
+                return (
+                  <td key={c.id} className="p-4 text-center border-l border-slate-200">
+                    <div className="flex flex-wrap justify-center gap-1">
+                      {facilities.slice(0, 4).map((fac: string, idx: number) => (
+                        <span
+                          key={idx}
+                          className="rounded bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700 font-medium"
+                        >
+                          {fac}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                );
+              })}
+            </tr>
+
             {/* Approvals */}
             <tr>
               <td className="p-4 font-bold text-slate-700 bg-slate-50/50">Approvals & Accreditations</td>
