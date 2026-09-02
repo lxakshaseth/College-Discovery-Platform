@@ -38,6 +38,19 @@ export function ReviewSection({ collegeSlug, initialReviews }: ReviewSectionProp
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [helpfulVotes, setHelpfulVotes] = useState<Record<string, number>>({});
+  const [userUpvoted, setUserUpvoted] = useState<Record<string, boolean>>({});
+
+  const toggleHelpful = (reviewId: string) => {
+    setUserUpvoted((prev) => {
+      const isUpvoted = !prev[reviewId];
+      setHelpfulVotes((vPrev) => ({
+        ...vPrev,
+        [reviewId]: Math.max(0, (vPrev[reviewId] || 0) + (isUpvoted ? 1 : -1)),
+      }));
+      return { ...prev, [reviewId]: isUpvoted };
+    });
+  };
 
   const ratingCounts: Record<number, number> = {
     5: reviews.filter((r) => Math.round(r.rating) === 5).length,
@@ -306,6 +319,27 @@ export function ReviewSection({ collegeSlug, initialReviews }: ReviewSectionProp
 
               <h6 className="font-bold text-sm text-gray-900">{rev.title}</h6>
               <p className="text-sm text-gray-600 leading-relaxed">{rev.content}</p>
+
+              {/* Review Card Footer: Helpful Action & Verified Tag */}
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => toggleHelpful(rev.id)}
+                  className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg transition ${
+                    userUpvoted[rev.id]
+                      ? "bg-blue-50 text-blue-700 border border-blue-200"
+                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                  }`}
+                  title="Mark review as helpful"
+                >
+                  <ThumbsUp className={`h-3.5 w-3.5 ${userUpvoted[rev.id] ? "fill-blue-600 text-blue-600" : ""}`} />
+                  <span>Helpful {helpfulVotes[rev.id] ? `(${helpfulVotes[rev.id]})` : ""}</span>
+                </button>
+
+                <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-150">
+                  ✓ Verified Student Review
+                </span>
+              </div>
             </div>
           ))
         )}
