@@ -45,6 +45,27 @@ export async function GET(req: NextRequest) {
       whereClause = {
         courses: { some: { name: { contains: "MBA" } } },
       };
+    } else if (exam === "MHT CET") {
+      whereClause = {
+        OR: [
+          { state: "Maharashtra" },
+          { examsAccepted: { contains: "MHT CET" } },
+        ],
+      };
+    } else if (exam === "KCET") {
+      whereClause = {
+        OR: [
+          { state: "Karnataka" },
+          { examsAccepted: { contains: "KCET" } },
+        ],
+      };
+    } else if (exam === "WBJEE") {
+      whereClause = {
+        OR: [
+          { state: "West Bengal" },
+          { examsAccepted: { contains: "WBJEE" } },
+        ],
+      };
     } else {
       // JEE Main
       whereClause = {};

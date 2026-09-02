@@ -183,6 +183,9 @@ export default function PredictorPage() {
                   <SelectItem value="JEE Main">JEE Main (NITs, IIITs, GFTIs)</SelectItem>
                   <SelectItem value="JEE Advanced">JEE Advanced (IITs)</SelectItem>
                   <SelectItem value="BITSAT">BITSAT (BITS Campuses)</SelectItem>
+                  <SelectItem value="MHT CET">MHT CET (Maharashtra Colleges)</SelectItem>
+                  <SelectItem value="KCET">KCET (Karnataka Colleges)</SelectItem>
+                  <SelectItem value="WBJEE">WBJEE (West Bengal Colleges)</SelectItem>
                   <SelectItem value="GATE">GATE (M.Tech Engineering)</SelectItem>
                   <SelectItem value="CAT">CAT (MBA & Management)</SelectItem>
                 </SelectContent>
@@ -232,16 +235,40 @@ export default function PredictorPage() {
                   )}
                 </div>
               ) : (
-                <Input
-                  type="number"
-                  placeholder="e.g. 12500"
-                  value={rank}
-                  onChange={(e) => setRank(e.target.value)}
-                  min={1}
-                  max={500000}
-                  required
-                  className="text-sm"
-                />
+                <div className="space-y-2">
+                  <Input
+                    type="number"
+                    placeholder="e.g. 12500"
+                    value={rank}
+                    onChange={(e) => setRank(e.target.value)}
+                    min={1}
+                    max={500000}
+                    required
+                    className="text-sm"
+                  />
+                  {/* Quick Rank Presets */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Presets:</span>
+                    {[
+                      { label: "AIR 2.5K (IIT)", rankVal: "2500", examVal: "JEE Advanced" },
+                      { label: "AIR 12K (NIT)", rankVal: "12000", examVal: "JEE Main" },
+                      { label: "AIR 28K (Govt)", rankVal: "28000", examVal: "JEE Main" },
+                      { label: "AIR 65K (State)", rankVal: "65000", examVal: "JEE Main" },
+                    ].map((preset) => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => {
+                          setRank(preset.rankVal);
+                          setExam(preset.examVal);
+                        }}
+                        className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition"
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
 
