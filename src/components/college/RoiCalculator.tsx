@@ -197,21 +197,72 @@ export function RoiCalculator({
             </p>
           </div>
 
-          {/* Card 4: 5-Year Net ROI Multiple */}
-          <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-4 space-y-1 shadow-sm">
-            <span className="text-xs font-medium text-purple-800 flex items-center gap-1">
-              <Award className="h-3.5 w-3.5" />
-              Net Career Wealth
-            </span>
-            <div className="text-lg sm:text-xl font-black text-purple-700">
-              +{formatCurrency(netWealthCreated)}
+            {/* Card 4: 5-Year Net ROI Multiple */}
+            <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-4 space-y-1 shadow-sm">
+              <span className="text-xs font-medium text-purple-800 flex items-center gap-1">
+                <Award className="h-3.5 w-3.5" />
+                Net Career Wealth
+              </span>
+              <div className="text-lg sm:text-xl font-black text-purple-700">
+                +{formatCurrency(netWealthCreated)}
+              </div>
+              <p className="text-[11px] text-purple-600 font-medium">
+                {roiMultiplier}x ROI Multiple
+              </p>
             </div>
-            <p className="text-[11px] text-purple-600 font-medium">
-              {roiMultiplier}x ROI Multiple
-            </p>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          {/* 5-Year Cumulative Cashflow Progression Timeline */}
+          <div className="pt-3 border-t border-blue-100/70 space-y-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
+                Year-by-Year Cumulative Recovery Timeline
+              </span>
+              <span className="text-[11px] text-slate-500 font-medium">
+                Total College Outlay: <span className="font-bold text-slate-700">{formatCurrency(totalInvestment)}</span>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+              {Array.from({ length: 5 }).map((_, idx) => {
+                const yearNum = idx + 1;
+                let cumSal = 0;
+                let s = startingInHand;
+                for (let i = 1; i <= yearNum; i++) {
+                  cumSal += s;
+                  s *= 1 + annualHikePercent / 100;
+                }
+                const isRecovered = cumSal >= totalInvestment;
+
+                return (
+                  <div
+                    key={yearNum}
+                    className={`p-3 rounded-xl border text-center transition ${
+                      isRecovered
+                        ? "bg-emerald-50/80 border-emerald-300 shadow-xs"
+                        : "bg-white border-slate-200 shadow-xs"
+                    }`}
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                      Year {yearNum}
+                    </span>
+                    <span className="text-xs sm:text-sm font-black text-slate-900 block mt-0.5">
+                      {formatCurrency(cumSal)}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold block mt-1.5 ${
+                        isRecovered ? "text-emerald-700" : "text-amber-700"
+                      }`}
+                    >
+                      {isRecovered ? "✓ Break-Even Met" : "Recovering Cost"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
   );
 }
