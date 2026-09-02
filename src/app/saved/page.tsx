@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CollegeCard } from "@/components/college/CollegeCard";
 import { SavedCollegeWithCollege } from "@/types";
 import { formatCurrency, formatPackage } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 export default function SavedPage() {
   const { data: session, status } = useSession();
@@ -19,6 +20,10 @@ export default function SavedPage() {
   const [wishlistSort, setWishlistSort] = useState<"recent" | "ranking" | "fees" | "rating">("recent");
   const [copiedComparisonId, setCopiedComparisonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const averageWishlistTuition = savedColleges.length > 0
+    ? Math.round(savedColleges.reduce((acc, curr) => acc + (curr.college.minFees || 0), 0) / savedColleges.length)
+    : 0;
 
   const exportWishlistCSV = () => {
     if (typeof window === "undefined" || savedColleges.length === 0) return;
@@ -165,14 +170,24 @@ export default function SavedPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <div className="border-b border-gray-200 pb-5">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
-          <Bookmark className="h-7 w-7 text-blue-600" />
-          My Saved Wishlist & Comparisons
-        </h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1">
-          Access your bookmarked colleges and saved comparison matrix sessions.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-5">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+            <Bookmark className="h-7 w-7 text-blue-600" />
+            My Saved Wishlist & Comparisons
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            Access your bookmarked colleges and saved comparison matrix sessions.
+          </p>
+        </div>
+
+        {savedColleges.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="secondary" className="bg-blue-50 text-blue-800 border border-blue-200 text-xs py-1 px-3">
+              Avg Tuition: {formatCurrency(averageWishlistTuition)} / yr
+            </Badge>
+          </div>
+        )}
       </div>
 
       {loading ? (
@@ -201,6 +216,25 @@ export default function SavedPage() {
                 />
 
                 <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
+                  {/* Compare Shortlisted Button */}
+                  {savedColleges.length >= 2 && (
+                    <Link
+                      href={`/compare?ids=${savedColleges
+                        .slice(0, 3)
+                        .map((s) => s.collegeId)
+                        .join(",")}`}
+                    >
+                      <Button
+                        size="sm"
+                        className="text-xs font-semibold gap-1.5 bg-blue-600 hover:bg-blue-700 text-white shrink-0 h-9 shadow-xs"
+                        title="Launch side-by-side comparison with your shortlisted colleges"
+                      >
+                        <Scale className="h-3.5 w-3.5" />
+                        <span>Compare Shortlisted ({Math.min(3, savedColleges.length)})</span>
+                      </Button>
+                    </Link>
+                  )}
+
                   {/* Sort Wishlist Selector */}
                   <Select
                     value={wishlistSort}
