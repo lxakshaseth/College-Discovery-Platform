@@ -248,7 +248,11 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
                   </p>
                 </div>
 
-                <Link href="/predictor">
+                <Link
+                  href={`/predictor?exam=${encodeURIComponent(
+                    examsAccepted[0] || "JEE Main"
+                  )}&homeState=${encodeURIComponent(college.state)}`}
+                >
                   <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold gap-1.5 shadow-xs">
                     <Sparkles className="h-3.5 w-3.5 text-amber-300" />
                     Predict Admission Chances

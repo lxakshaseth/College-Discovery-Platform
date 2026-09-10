@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Sparkles, Trophy, CheckCircle, AlertTriangle, ArrowUpRight, Scale, Check, Filter, Layers, Target, Compass, Download, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +39,8 @@ const INDIAN_STATES = [
   "West Bengal", "Uttar Pradesh", "Punjab", "Rajasthan", "Kerala", "Uttarakhand"
 ];
 
-export default function PredictorPage() {
+function PredictorContent() {
+  const searchParams = useSearchParams();
   const [inputMode, setInputMode] = useState<"rank" | "percentile">("rank");
   const [percentile, setPercentile] = useState("98.50");
   const [exam, setExam] = useState("JEE Main");
@@ -49,6 +51,15 @@ export default function PredictorPage() {
   const [results, setResults] = useState<MatchedCollege[] | null>(null);
   const [tierFilter, setTierFilter] = useState<"ALL" | "HIGH" | "MEDIUM" | "LOW">("ALL");
   const [resultSearchQuery, setResultSearchQuery] = useState("");
+
+  useEffect(() => {
+    const qExam = searchParams.get("exam");
+    const qState = searchParams.get("homeState");
+    const qRank = searchParams.get("rank");
+    if (qExam) setExam(qExam);
+    if (qState) setHomeState(qState);
+    if (qRank) setRank(qRank);
+  }, [searchParams]);
 
   const { addToCompare, removeFromCompare, isInCompare, compareList } = useCompare();
 
@@ -506,5 +517,13 @@ export default function PredictorPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function PredictorPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-slate-500">Loading Predictor Engine...</div>}>
+      <PredictorContent />
+    </Suspense>
   );
 }
