@@ -126,23 +126,34 @@ export function CollegeCard({ college }: CollegeCardProps) {
           ) : null}
         </div>
 
-        {/* Accepted Entrance Exams Badges */}
-        {exams.length > 0 ? (
-          <div className="flex flex-wrap items-center gap-1.5 mb-3.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Exams:</span>
-            {exams.slice(0, 3).map((examItem, idx) => (
-              <span
-                key={idx}
-                className="bg-blue-50 text-blue-700 border border-blue-100 text-[10px] font-semibold px-2 py-0.5 rounded"
-              >
-                {examItem}
-              </span>
-            ))}
-            {exams.length > 3 ? (
-              <span className="text-[10px] text-slate-400 font-medium">+{exams.length - 3}</span>
-            ) : null}
-          </div>
-        ) : null}
+        {/* Accepted Entrance Exams Badges & Predict Chance Shortcut */}
+        <div className="flex items-center justify-between gap-1.5 mb-3.5 flex-wrap">
+          {exams.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Exams:</span>
+              {exams.slice(0, 3).map((examItem, idx) => (
+                <span
+                  key={idx}
+                  className="bg-blue-50 text-blue-700 border border-blue-100 text-[10px] font-semibold px-2 py-0.5 rounded"
+                >
+                  {examItem}
+                </span>
+              ))}
+              {exams.length > 3 ? (
+                <span className="text-[10px] text-slate-400 font-medium">+{exams.length - 3}</span>
+              ) : null}
+            </div>
+          ) : <div />}
+
+          <Link
+            href={`/predictor?exam=${encodeURIComponent(exams[0] || "JEE Main")}&homeState=${encodeURIComponent(college.state)}`}
+            className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-0.5 ml-auto shrink-0"
+            title={`Check admission chance for ${college.name}`}
+          >
+            <span>Predict Chance</span>
+            <ArrowUpRight className="h-3 w-3" />
+          </Link>
+        </div>
 
         {/* Metrics Grid: Fees, Rating & Avg CTC */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 rounded-lg bg-slate-50 border border-slate-100 mb-4">
