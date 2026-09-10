@@ -325,8 +325,31 @@ export default function DiscussionsPage() {
                 </div>
               )}
 
-              <div>
-                <Label className="text-xs font-bold text-slate-700 mb-1 block">Question Headline</Label>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-bold text-slate-700">Question Headline</Label>
+                  <span className="text-[11px] text-slate-400 font-normal">Quick templates:</span>
+                </div>
+
+                {/* Quick Question Starters */}
+                <div className="flex flex-wrap gap-1.5 pb-0.5">
+                  {[
+                    { label: "🎯 Cutoff Doubt", text: "What is the expected JEE cutoff for CSE / Core branches here?" },
+                    { label: "💼 Placement Stats", text: "What are the verified median packages and top recruiters for this year?" },
+                    { label: "🏢 Hostel & Mess", text: "How is the hostel accommodation, Wi-Fi speed, and mess food quality?" },
+                    { label: "⚖️ Branch Comparison", text: "How does CSE at this college compare against top NITs in placements?" },
+                  ].map((starter) => (
+                    <button
+                      key={starter.label}
+                      type="button"
+                      onClick={() => setAskTitle(starter.text)}
+                      className="rounded-md bg-blue-50/80 px-2 py-0.5 text-[11px] font-semibold text-blue-700 hover:bg-blue-100 transition border border-blue-200/60"
+                    >
+                      {starter.label}
+                    </button>
+                  ))}
+                </div>
+
                 <Input
                   placeholder="e.g. What is the safe JEE Main rank for CSE at NIT Trichy in 2026?"
                   value={askTitle}
