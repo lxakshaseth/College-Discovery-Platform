@@ -66,6 +66,9 @@ export async function GET(req: NextRequest) {
         case "ranking":
           orderBy = { ranking: order === "asc" ? "asc" : "desc" };
           break;
+        case "established":
+          orderBy = { establishedYear: order === "desc" ? "desc" : "asc" };
+          break;
       }
     }
 
