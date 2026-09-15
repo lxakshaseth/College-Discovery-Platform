@@ -320,6 +320,7 @@ export function CollegeFilters() {
             <SelectItem value="ranking">NIRF Ranking (Top 1st)</SelectItem>
             <SelectItem value="fees">Lowest Annual Fees</SelectItem>
             <SelectItem value="name">Alphabetical (A-Z)</SelectItem>
+            <SelectItem value="established">Oldest / Legacy Estd.</SelectItem>
           </SelectContent>
         </Select>
       </div>
