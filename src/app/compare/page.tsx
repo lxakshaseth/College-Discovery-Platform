@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Scale, Plus, Bookmark, RefreshCw, Trash2, ArrowLeft, Sparkles, ArrowRight } from "lucide-react";
+import { Scale, Plus, Bookmark, RefreshCw, Trash2, ArrowLeft, Sparkles, ArrowRight, Share2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CompareTable } from "@/components/college/CompareTable";
@@ -16,7 +16,9 @@ const POPULAR_MATCHUPS = [
   { title: "IIT Bombay vs IIT Delhi", query1: "IIT Bombay", query2: "IIT Delhi", desc: "Top 2 NIRF Premier Engineering Institutes" },
   { title: "IIT Madras vs IIT Kharagpur", query1: "IIT Madras", query2: "IIT Kharagpur", desc: "NIRF #1 vs Oldest Legacy IIT" },
   { title: "BITS Pilani vs NIT Trichy", query1: "BITS Pilani", query2: "NIT Trichy", desc: "Premier Private vs Top Tier NIT" },
+  { title: "IIIT Hyderabad vs BITS Pilani", query1: "IIIT Hyderabad", query2: "BITS Pilani", desc: "Top CS Coding Culture vs BITS Pilani" },
   { title: "DTU Delhi vs NSUT Delhi", query1: "Delhi Technological", query2: "Netaji Subhas", desc: "Delhi Premier State Engineering Giants" },
+  { title: "NIT Surathkal vs NIT Warangal", query1: "NIT Surathkal", query2: "NIT Warangal", desc: "Top 2 Ranked South NITs" },
 ];
 
 function ComparePageContent() {
@@ -35,6 +37,7 @@ function ComparePageContent() {
 
   // Save comparison state
   const [savingComp, setSavingComp] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const idsFromUrl = searchParams.get("ids");
 
@@ -213,6 +216,14 @@ function ComparePageContent() {
     }
   };
 
+  const handleShareLink = () => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Top Banner */}
@@ -235,6 +246,20 @@ function ComparePageContent() {
         <div className="flex flex-wrap items-center gap-2">
           {colleges.length >= 2 && (
             <>
+              <Button
+                onClick={handleShareLink}
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs text-slate-700 hover:bg-slate-50 border-slate-200"
+                title="Copy shareable link for this comparison"
+              >
+                {copiedLink ? (
+                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                ) : (
+                  <Share2 className="h-3.5 w-3.5 text-slate-500" />
+                )}
+                <span>{copiedLink ? "Link Copied!" : "Share Link"}</span>
+              </Button>
               <Button
                 onClick={handleExportCSV}
                 variant="outline"
