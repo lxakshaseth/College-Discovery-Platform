@@ -85,6 +85,12 @@ export function CollegeListContainer({ colleges, total }: CollegeListContainerPr
           <Link href="/colleges?q=NIT" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 transition">
             NITs
           </Link>
+          <Link href="/colleges?sortBy=established" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 hover:text-purple-700 transition">
+            🏛️ Heritage
+          </Link>
+          <Link href="/colleges?sortBy=fees" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 transition">
+            ⚡ Low Fees
+          </Link>
           <Link href="/colleges?exam=JEE+Advanced" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-50 hover:text-amber-800 transition">
             JEE Adv
           </Link>
