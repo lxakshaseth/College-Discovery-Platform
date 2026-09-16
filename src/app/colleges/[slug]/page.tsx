@@ -312,7 +312,25 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
         </TabsContent>
 
         {/* Tab 2: Courses */}
-        <TabsContent value="courses">
+        <TabsContent value="courses" className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+              <span className="text-[11px] font-semibold uppercase text-slate-500 tracking-wider">Total Programs</span>
+              <div className="text-xl font-bold text-slate-900 mt-0.5">{college.courses.length} Available Courses</div>
+              <p className="text-[11px] text-slate-400">UG & PG Degree Pathways</p>
+            </div>
+            <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 shadow-xs">
+              <span className="text-[11px] font-semibold uppercase text-blue-700 tracking-wider">Starting Tuition Fee</span>
+              <div className="text-xl font-bold text-blue-900 mt-0.5">{formatCurrency(college.minFees)} / yr</div>
+              <p className="text-[11px] text-blue-600">Base Annual Academic Tuition</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+              <span className="text-[11px] font-semibold uppercase text-slate-500 tracking-wider">Maximum Tuition Fee</span>
+              <div className="text-xl font-bold text-slate-900 mt-0.5">{formatCurrency(college.maxFees)} / yr</div>
+              <p className="text-[11px] text-slate-400">Specialized Programs Cap</p>
+            </div>
+          </div>
+
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 overflow-x-auto">
             <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-blue-600" />
