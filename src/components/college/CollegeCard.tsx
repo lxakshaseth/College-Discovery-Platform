@@ -79,6 +79,14 @@ export function CollegeCard({ college }: CollegeCardProps) {
               <Badge variant="outline" className="bg-indigo-50 text-indigo-800 border-indigo-200 text-[10px] font-bold">
                 💼 High CTC
               </Badge>
+            ) : (college.minFees || 0) <= 120000 && college.type === "PUBLIC" ? (
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px] font-bold">
+                💰 Affordable
+              </Badge>
+            ) : college.establishedYear && college.establishedYear <= 1960 ? (
+              <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200 text-[10px] font-bold">
+                🏛️ Heritage
+              </Badge>
             ) : null}
           </div>
           <div className="flex items-center gap-1">

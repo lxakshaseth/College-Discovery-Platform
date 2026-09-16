@@ -107,6 +107,27 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
               <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 font-semibold">
                 {college.type} Institute
               </Badge>
+              {college.ranking && college.ranking <= 10 ? (
+                <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-300 text-xs font-bold">
+                  🔥 Top 10 NIRF
+                </Badge>
+              ) : college.rating >= 4.6 ? (
+                <Badge variant="outline" className="bg-orange-50 text-orange-800 border-orange-200 text-xs font-bold">
+                  ⭐ Top Rated
+                </Badge>
+              ) : (latestPlacement?.averagePackage || 0) >= 20 ? (
+                <Badge variant="outline" className="bg-indigo-50 text-indigo-800 border-indigo-200 text-xs font-bold">
+                  💼 High CTC Tier
+                </Badge>
+              ) : college.minFees <= 120000 && college.type === "PUBLIC" ? (
+                <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-xs font-bold">
+                  💰 Affordable Tuition
+                </Badge>
+              ) : college.establishedYear && college.establishedYear <= 1960 ? (
+                <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200 text-xs font-bold">
+                  🏛️ Heritage Estd.
+                </Badge>
+              ) : null}
               {approvals.map((appr: string, idx: number) => (
                 <Badge key={idx} variant="secondary" className="text-xs">
                   {appr}
