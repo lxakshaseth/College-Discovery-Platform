@@ -425,6 +425,36 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                 );
               })}
             </tr>
+
+            {/* Admission Probability Shortcut Row */}
+            <tr className="bg-slate-50/70">
+              <td className="p-4 font-bold text-slate-700 bg-slate-50/90">
+                Admission Probability
+              </td>
+              {colleges.map((c) => {
+                const exams = safeJsonParse<string[]>(c.examsAccepted, []);
+                return (
+                  <td key={c.id} className="p-4 text-center border-l border-slate-200">
+                    <Link
+                      href={`/predictor?exam=${encodeURIComponent(
+                        exams[0] || "JEE Main"
+                      )}&homeState=${encodeURIComponent(c.state)}`}
+                    >
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs font-semibold gap-1 bg-white hover:bg-blue-50 hover:text-blue-700 border-blue-200 text-blue-600 shadow-xs"
+                        title={`Check rank cutoff probability for ${c.name}`}
+                      >
+                        <Trophy className="h-3.5 w-3.5 text-amber-500" />
+                        <span>Predict Chances</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                    </Link>
+                  </td>
+                );
+              })}
+            </tr>
           </tbody>
         </table>
       </div>
