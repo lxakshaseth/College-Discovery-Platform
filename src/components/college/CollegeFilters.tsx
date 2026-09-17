@@ -10,8 +10,26 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
 const INDIAN_STATES = [
-  "Maharashtra", "Delhi", "Tamil Nadu", "Karnataka", "Telangana",
-  "West Bengal", "Uttar Pradesh", "Punjab", "Rajasthan", "Kerala", "Uttarakhand"
+  "Andhra Pradesh",
+  "Assam",
+  "Bihar",
+  "Delhi",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Tamil Nadu",
+  "Telangana",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
 ];
 
 const ACCEPTED_EXAMS = [
