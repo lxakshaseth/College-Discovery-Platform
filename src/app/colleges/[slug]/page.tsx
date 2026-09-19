@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatPackage, safeJsonParse } from "@/lib/utils";
-import { Star, MapPin, Building2, Globe, Award, CheckCircle2, TrendingUp, IndianRupee, ArrowLeft, BookOpen, MessageSquare, Sparkles, ShieldCheck, GraduationCap, ArrowRight } from "lucide-react";
+import { Star, MapPin, Building2, Globe, Award, CheckCircle2, TrendingUp, IndianRupee, ArrowLeft, BookOpen, MessageSquare, Sparkles, ShieldCheck, GraduationCap, ArrowRight, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -443,6 +443,49 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
                     ))}
                   </div>
                 </div>
+
+                {/* Annual Placement Drive Trends */}
+                {college.placements && college.placements.length > 0 && (
+                  <div className="space-y-3 pt-2">
+                    <h4 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                      <Trophy className="h-4 w-4 text-amber-500" />
+                      Annual Placement Drive Trends
+                    </h4>
+                    <div className="overflow-x-auto rounded-xl border border-slate-200">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                          <tr>
+                            <th className="p-3">Drive Batch</th>
+                            <th className="p-3">Average Package</th>
+                            <th className="p-3">Highest Package</th>
+                            <th className="p-3">Placement Rate</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {college.placements.map((p: any) => (
+                            <tr key={p.id} className="hover:bg-slate-50/50 transition">
+                              <td className="p-3 font-bold text-slate-900">
+                                {p.year} Drive
+                              </td>
+                              <td className="p-3 font-bold text-blue-700">
+                                {formatPackage(p.averagePackage)}
+                              </td>
+                              <td className="p-3 font-bold text-emerald-700">
+                                {formatPackage(p.highestPackage)}
+                              </td>
+                              <td className="p-3 font-medium text-slate-700">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                  {p.placementRate}% Placed
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
                 <div className="pt-2">
                   <RoiCalculator
                     minFees={college.minFees}
