@@ -225,6 +225,7 @@ export default function DiscussionsPage() {
 
   const [activeTopic, setActiveTopic] = useState("ALL");
   const [unansweredOnly, setUnansweredOnly] = useState(false);
+  const [myQuestionsOnly, setMyQuestionsOnly] = useState(false);
   const [sortOrder, setSortOrder] = useState<"newest" | "upvotes" | "answers" | "unanswered">("newest");
 
   const unansweredCount = questions.filter((q) => q.answers.length === 0).length;
@@ -240,6 +241,9 @@ export default function DiscussionsPage() {
 
   const filteredQuestions = questions
     .filter((q) => {
+      // My questions filter
+      if (myQuestionsOnly && session?.user && q.user.id !== (session.user as any).id) return false;
+
       // Unanswered only filter
       if (unansweredOnly && q.answers.length > 0) return false;
 
@@ -505,6 +509,28 @@ export default function DiscussionsPage() {
               {unansweredCount}
             </span>
           </button>
+
+          {session?.user && (
+            <button
+              onClick={() => setMyQuestionsOnly(!myQuestionsOnly)}
+              className={`text-xs px-2.5 py-1 rounded-full font-semibold transition flex items-center gap-1.5 ${
+                myQuestionsOnly
+                  ? "bg-purple-600 text-white shadow-xs"
+                  : "bg-purple-50 text-purple-800 border border-purple-200 hover:bg-purple-100"
+              }`}
+              title="Show only questions posted by you"
+            >
+              <User className="h-3 w-3" />
+              <span>My Questions</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  myQuestionsOnly ? "bg-purple-700 text-white" : "bg-purple-200 text-purple-900"
+                }`}
+              >
+                {questions.filter((q) => q.user?.id === (session.user as any)?.id).length}
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
