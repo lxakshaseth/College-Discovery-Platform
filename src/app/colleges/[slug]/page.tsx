@@ -13,6 +13,7 @@ import { ShareCollegeButton } from "@/components/college/ShareCollegeButton";
 import { PrintCollegeButton } from "@/components/college/PrintCollegeButton";
 import { AddToCompareDetailButton } from "@/components/college/AddToCompareDetailButton";
 import { CollegeCard } from "@/components/college/CollegeCard";
+import { CourseListFilter } from "@/components/college/CourseListFilter";
 
 export const dynamic = "force-dynamic";
 
@@ -352,49 +353,12 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 overflow-x-auto">
-            <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600" />
-              Offered Academic Programs & Tuition
-            </h3>
-
-            <table className="w-full text-left border-collapse min-w-[600px]">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase font-bold text-slate-500 tracking-wider">
-                  <th className="p-3.5">Course Name</th>
-                  <th className="p-3.5">Degree Level</th>
-                  <th className="p-3.5">Duration</th>
-                  <th className="p-3.5">Annual Tuition Fees</th>
-                  <th className="p-3.5">Total Estimated Fees</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
-                {college.courses?.map((course: any) => {
-                  const durationYears = parseInt(course.duration) || (course.type === "UG" ? 4 : 2);
-                  const totalEstimatedFees = course.fees * durationYears;
-
-                  return (
-                    <tr key={course.id} className="hover:bg-blue-50/40 transition">
-                      <td className="p-3.5 font-bold text-slate-900">{course.name}</td>
-                      <td className="p-3.5">
-                        <Badge variant="outline" className="text-xs font-semibold">
-                          {course.type}
-                        </Badge>
-                      </td>
-                      <td className="p-3.5 text-slate-600">{course.duration}</td>
-                      <td className="p-3.5 font-bold text-slate-900">{formatCurrency(course.fees)} / yr</td>
-                      <td className="p-3.5 font-bold text-blue-700">
-                        {formatCurrency(totalEstimatedFees)}
-                        <span className="text-[11px] font-normal text-slate-400 block">
-                          ({durationYears} yrs program)
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <CourseListFilter
+            courses={college.courses || []}
+            collegeSlug={college.slug}
+            primaryExam={examsAccepted[0] || "JEE Main"}
+            collegeState={college.state}
+          />
         </TabsContent>
 
         {/* Tab 3: Placements */}

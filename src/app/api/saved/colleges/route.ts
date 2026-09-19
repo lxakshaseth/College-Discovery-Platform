@@ -90,3 +90,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = (session.user as { id: string }).id;
+
+    await prisma.savedCollege.deleteMany({
+      where: { userId },
+    });
+
+    return NextResponse.json({ message: "Wishlist cleared successfully" });
+  } catch (error) {
+    console.error("Clear saved colleges error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}

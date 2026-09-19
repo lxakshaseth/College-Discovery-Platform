@@ -20,6 +20,24 @@ export default function SavedPage() {
   const [wishlistSort, setWishlistSort] = useState<"recent" | "ranking" | "fees" | "rating">("recent");
   const [copiedComparisonId, setCopiedComparisonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [clearingWishlist, setClearingWishlist] = useState(false);
+
+  const handleClearWishlist = async () => {
+    if (typeof window !== "undefined" && !window.confirm("Are you sure you want to clear all colleges from your wishlist?")) {
+      return;
+    }
+    setClearingWishlist(true);
+    try {
+      const res = await fetch("/api/saved/colleges", { method: "DELETE" });
+      if (res.ok) {
+        setSavedColleges([]);
+      }
+    } catch (e) {
+      console.error("Failed to clear wishlist", e);
+    } finally {
+      setClearingWishlist(false);
+    }
+  };
 
   const averageWishlistTuition = savedColleges.length > 0
     ? Math.round(savedColleges.reduce((acc, curr) => acc + (curr.college.minFees || 0), 0) / savedColleges.length)
@@ -260,6 +278,18 @@ export default function SavedPage() {
                   >
                     <Download className="h-3.5 w-3.5 text-gray-500" />
                     <span>Export Wishlist</span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearWishlist}
+                    disabled={clearingWishlist}
+                    className="text-xs font-semibold gap-1.5 border-rose-200 text-rose-700 hover:bg-rose-50 shrink-0 h-9"
+                    title="Clear all saved colleges from your wishlist"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+                    <span>{clearingWishlist ? "Clearing..." : "Clear All"}</span>
                   </Button>
                 </div>
               </div>
