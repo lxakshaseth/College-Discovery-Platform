@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Star, MapPin, Building, IndianRupee, Trophy, Check, X, Award, ExternalLink, Share2, CheckCheck, Download } from "lucide-react";
+import { Star, MapPin, Building, IndianRupee, Trophy, Check, X, Award, ExternalLink, Share2, CheckCheck, Download, TrendingUp } from "lucide-react";
 import { CompareCollege } from "@/types";
 import { formatCurrency, formatPackage, safeJsonParse } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +49,15 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
     return currAvg > prevAvg ? curr : prev;
   }).id;
 
+  const highestRoiId = colleges.reduce((prev, curr) => {
+    const getRoi = (c: CompareCollege) => {
+      const total4YrCost = (c.minFees || 0) * 4;
+      const avgSalary = (c.placements[0]?.averagePackage || 0) * 100000;
+      return total4YrCost > 0 ? avgSalary / total4YrCost : 0;
+    };
+    return getRoi(curr) > getRoi(prev) ? curr : prev;
+  }).id;
+
   const handleShare = () => {
     if (typeof window !== "undefined") {
       navigator.clipboard.writeText(window.location.href);
@@ -75,6 +84,14 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
       ["Average Package (CTC)", ...colleges.map((c) => (c.placements[0] ? `"${c.placements[0].averagePackage} LPA"` : "N/A"))],
       ["Highest Package (CTC)", ...colleges.map((c) => (c.placements[0] ? `"${c.placements[0].highestPackage} LPA"` : "N/A"))],
       ["Placement Rate", ...colleges.map((c) => (c.placements[0] ? `"${c.placements[0].placementRate}%"` : "N/A"))],
+      [
+        "4-Year ROI Multiple",
+        ...colleges.map((c) => {
+          const total4YrFees = (c.minFees || 0) * 4;
+          const avgSalary = (c.placements[0]?.averagePackage || 0) * 100000;
+          return total4YrFees > 0 && avgSalary > 0 ? `"${(avgSalary / total4YrFees).toFixed(2)}x"` : "N/A";
+        }),
+      ],
       [
         "Top Recruiters",
         ...colleges.map((c) => {
@@ -312,6 +329,47 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                 return (
                   <td key={c.id} className="p-4 text-center border-l border-slate-200 font-bold text-slate-800">
                     {placement ? `${placement.placementRate.toFixed(1)}%` : "N/A"}
+                  </td>
+                );
+              })}
+            </tr>
+
+            {/* 4-Year ROI Multiple */}
+            <tr className={highlightDiff ? "bg-amber-50/30" : ""}>
+              <td className="p-4 font-bold text-slate-700 bg-slate-50/50">
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp className="h-4 w-4 text-emerald-600" />
+                  <span>4-Year ROI Multiple</span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-normal mt-0.5">
+                  1st-Yr Salary / 4-Yr Total Tuition
+                </div>
+              </td>
+              {colleges.map((c) => {
+                const placement = c.placements[0];
+                const total4YrFees = (c.minFees || 0) * 4;
+                const avgSalary = (placement?.averagePackage || 0) * 100000;
+                const roiMultiple = total4YrFees > 0 && avgSalary > 0 ? avgSalary / total4YrFees : 0;
+
+                return (
+                  <td key={c.id} className="p-4 text-center border-l border-slate-200">
+                    {roiMultiple > 0 ? (
+                      <div>
+                        <div className="text-base font-extrabold text-emerald-700">
+                          {roiMultiple.toFixed(2)}x
+                        </div>
+                        <div className="text-[11px] font-semibold text-slate-500 mt-0.5">
+                          {roiMultiple >= 1.0 ? "Full Tuition Recovered Yr 1" : `${Math.round(roiMultiple * 100)}% Yr 1 Recovery`}
+                        </div>
+                        {c.id === highestRoiId && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full mt-1 border border-emerald-300">
+                            ★ Top ROI Efficiency
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-slate-400">N/A</span>
+                    )}
                   </td>
                 );
               })}
