@@ -3,6 +3,7 @@ import { Search, Scale, Sparkles, Trophy, GraduationCap, Building2, ArrowRight, 
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import { CollegeCard } from "@/components/college/CollegeCard";
+import { FaqSection } from "@/components/home/FaqSection";
 
 export const dynamic = "force-dynamic";
 
@@ -259,6 +260,9 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Platform FAQs Accordion */}
+      <FaqSection />
 
       {/* Rank Predictor Banner CTA */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
