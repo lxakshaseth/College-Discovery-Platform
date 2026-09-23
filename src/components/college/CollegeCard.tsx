@@ -20,6 +20,10 @@ export function CollegeCard({ college }: CollegeCardProps) {
 
   const exams: string[] = safeJsonParse<string[]>(college.examsAccepted, []);
   const isComparing = isInCompare(college.id);
+  const placement = college.placements?.[0];
+  const total4YrCost = (college.minFees || 0) * 4;
+  const avgSalaryRupees = (placement?.averagePackage || 0) * 100000;
+  const roiMultiple = total4YrCost > 0 && avgSalaryRupees > 0 ? (avgSalaryRupees / total4YrCost).toFixed(1) : null;
 
   const handleQuickShare = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -86,6 +90,11 @@ export function CollegeCard({ college }: CollegeCardProps) {
             ) : college.establishedYear && college.establishedYear <= 1960 ? (
               <Badge variant="outline" className="bg-purple-50 text-purple-800 border-purple-200 text-[10px] font-bold">
                 🏛️ Heritage
+              </Badge>
+            ) : null}
+            {roiMultiple && parseFloat(roiMultiple) >= 2.0 ? (
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px] font-bold">
+                ⚡ {roiMultiple}x ROI
               </Badge>
             ) : null}
           </div>
@@ -175,8 +184,13 @@ export function CollegeCard({ college }: CollegeCardProps) {
           <div>
             <span className="block text-[10px] font-semibold uppercase text-slate-500 tracking-wider">Avg CTC</span>
             <span className="text-xs sm:text-sm font-bold text-blue-700 block mt-0.5">
-              {college.placements?.[0] ? formatPackage(college.placements[0].averagePackage) : "₹14.5 LPA"}
+              {placement ? formatPackage(placement.averagePackage) : "₹14.5 LPA"}
             </span>
+            {placement?.placementRate ? (
+              <span className="text-[10px] text-emerald-600 font-semibold block">
+                {placement.placementRate.toFixed(0)}% Placed
+              </span>
+            ) : null}
           </div>
 
           <div className="col-span-2 sm:col-span-1">
