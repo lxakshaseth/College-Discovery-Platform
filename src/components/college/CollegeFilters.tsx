@@ -337,6 +337,8 @@ export function CollegeFilters() {
             <SelectItem value="rating">Highest Rating</SelectItem>
             <SelectItem value="ranking">NIRF Ranking (Top 1st)</SelectItem>
             <SelectItem value="fees">Lowest Annual Fees</SelectItem>
+            <SelectItem value="fees_desc">Highest Annual Fees</SelectItem>
+            <SelectItem value="reviews">Most Student Reviews</SelectItem>
             <SelectItem value="name">Alphabetical (A-Z)</SelectItem>
             <SelectItem value="established">Oldest / Legacy Estd.</SelectItem>
           </SelectContent>
