@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, TrendingUp, DollarSign, Clock, Award, ShieldCheck } from "lucide-react";
+import { Calculator, TrendingUp, DollarSign, Clock, Award, ShieldCheck, Landmark, ChevronDown, ChevronUp, AlertCircle, Percent } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatPackage } from "@/lib/utils";
 
 interface RoiCalculatorProps {
@@ -28,17 +30,44 @@ export function RoiCalculator({
   const [expectedSalaryLpa, setExpectedSalaryLpa] = useState<number>(defaultAvg);
   const [annualHikePercent, setAnnualHikePercent] = useState<number>(10);
 
+  // Education Loan EMI States
+  const [showLoanSection, setShowLoanSection] = useState(false);
+  const [loanPrincipal, setLoanPrincipal] = useState<number>(0);
+  const [loanInterestRate, setLoanInterestRate] = useState<number>(8.5);
+  const [loanTenureYears, setLoanTenureYears] = useState<number>(7);
+
   const effectiveAnnualTuition = annualTuition * (1 - scholarshipPercent / 100);
   const totalTuitionCost = effectiveAnnualTuition * durationYears;
   const totalLivingCost = annualLivingCost * durationYears;
   const totalInvestment = totalTuitionCost + totalLivingCost;
 
+  // Sync loan default when opened if principal is 0
+  const activeLoanAmount = loanPrincipal > 0 ? loanPrincipal : totalTuitionCost;
+
   // Placement CTC in Rupees & starting in-hand
   const startingSalaryRupees = (expectedSalaryLpa || 1) * 100000;
   const startingInHand = startingSalaryRupees * 0.8;
+  const monthlySalaryInHand = Math.round(startingInHand / 12);
 
   // Payback period in years
   const paybackYears = startingInHand > 0 ? (totalInvestment / startingInHand).toFixed(1) : "N/A";
+
+  // Education Loan EMI Calculation
+  const monthlyLoanRate = loanInterestRate / 12 / 100;
+  const totalLoanMonths = loanTenureYears * 12;
+  const monthlyEmi =
+    activeLoanAmount > 0 && monthlyLoanRate > 0
+      ? Math.round(
+          (activeLoanAmount *
+            monthlyLoanRate *
+            Math.pow(1 + monthlyLoanRate, totalLoanMonths)) /
+            (Math.pow(1 + monthlyLoanRate, totalLoanMonths) - 1)
+        )
+      : 0;
+  const totalLoanRepayment = monthlyEmi * totalLoanMonths;
+  const totalLoanInterest = Math.max(0, totalLoanRepayment - activeLoanAmount);
+  const emiBurdenPercent =
+    monthlySalaryInHand > 0 ? Math.round((monthlyEmi / monthlySalaryInHand) * 100) : 0;
 
   // Cumulative 5-year in-hand earnings with annual hike compound growth
   let fiveYearEarnings = 0;
@@ -261,6 +290,130 @@ export function RoiCalculator({
                 );
               })}
             </div>
+          </div>
+
+          {/* Education Loan EMI & Repayment Planner */}
+          <div className="pt-3 border-t border-blue-100/70 space-y-3">
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setShowLoanSection(!showLoanSection)}
+                className="flex items-center gap-2 text-xs font-bold text-blue-700 hover:text-blue-800 transition"
+              >
+                <Landmark className="h-4 w-4 text-blue-600" />
+                <span>Education Loan EMI & Repayment Estimator</span>
+                {showLoanSection ? (
+                  <ChevronUp className="h-3.5 w-3.5 text-blue-600" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5 text-blue-600" />
+                )}
+              </button>
+
+              <Badge
+                variant="outline"
+                className="text-[10px] font-semibold text-slate-500 border-slate-200"
+              >
+                {showLoanSection ? "Active Planner" : "Optional Loan Estimator"}
+              </Badge>
+            </div>
+
+            {showLoanSection && (
+              <div className="rounded-xl border border-blue-200 bg-white p-4.5 space-y-4 shadow-xs animate-in fade-in duration-200">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold text-slate-700">Loan Principal (₹)</Label>
+                      <button
+                        type="button"
+                        onClick={() => setLoanPrincipal(totalTuitionCost)}
+                        className="text-[10px] text-blue-600 hover:underline font-semibold"
+                      >
+                        Set to 100% Tuition
+                      </button>
+                    </div>
+                    <Input
+                      type="number"
+                      step={25000}
+                      min={10000}
+                      value={activeLoanAmount}
+                      onChange={(e) => setLoanPrincipal(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="bg-slate-50 text-sm h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-700">Annual Interest Rate (% p.a.)</Label>
+                    <Input
+                      type="number"
+                      step={0.25}
+                      min={4}
+                      max={20}
+                      value={loanInterestRate}
+                      onChange={(e) => setLoanInterestRate(Math.max(1, parseFloat(e.target.value) || 1))}
+                      className="bg-slate-50 text-sm h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-700">Repayment Tenure (Years)</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={20}
+                      value={loanTenureYears}
+                      onChange={(e) => setLoanTenureYears(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="bg-slate-50 text-sm h-9"
+                    />
+                  </div>
+                </div>
+
+                {/* EMI Results Summary */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-1">
+                  <div className="rounded-lg bg-blue-50/70 p-3 border border-blue-100 text-center">
+                    <span className="text-[11px] font-semibold text-blue-700 block">Monthly Loan EMI</span>
+                    <span className="text-base font-extrabold text-blue-900 mt-0.5 block">
+                      {formatCurrency(monthlyEmi)} / mo
+                    </span>
+                  </div>
+
+                  <div className="rounded-lg bg-slate-50 p-3 border border-slate-200 text-center">
+                    <span className="text-[11px] font-semibold text-slate-600 block">Total Interest Payable</span>
+                    <span className="text-base font-extrabold text-slate-900 mt-0.5 block">
+                      {formatCurrency(totalLoanInterest)}
+                    </span>
+                  </div>
+
+                  <div className="rounded-lg bg-slate-50 p-3 border border-slate-200 text-center">
+                    <span className="text-[11px] font-semibold text-slate-600 block">Total Repayment Outlay</span>
+                    <span className="text-base font-extrabold text-slate-900 mt-0.5 block">
+                      {formatCurrency(totalLoanRepayment)}
+                    </span>
+                  </div>
+
+                  <div className="rounded-lg bg-slate-50 p-3 border border-slate-200 text-center">
+                    <span className="text-[11px] font-semibold text-slate-600 block">EMI-to-Salary Ratio</span>
+                    <span
+                      className={`text-base font-extrabold mt-0.5 block ${
+                        emiBurdenPercent <= 25
+                          ? "text-emerald-700"
+                          : emiBurdenPercent <= 40
+                          ? "text-amber-700"
+                          : "text-rose-700"
+                      }`}
+                    >
+                      {emiBurdenPercent}% of In-Hand
+                    </span>
+                    <span className="text-[10px] text-slate-400 block">
+                      {emiBurdenPercent <= 25
+                        ? "Safe (<25%)"
+                        : emiBurdenPercent <= 40
+                        ? "Moderate (25-40%)"
+                        : "High Burden (>40%)"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
