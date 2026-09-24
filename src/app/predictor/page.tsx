@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Sparkles, Trophy, CheckCircle, AlertTriangle, ArrowUpRight, Scale, Check, Filter, Layers, Target, Compass, Download, Search } from "lucide-react";
+import { Sparkles, Trophy, CheckCircle, AlertTriangle, ArrowUpRight, Scale, Check, Filter, Layers, Target, Compass, Download, Search, Share2, CheckCheck, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +23,7 @@ interface MatchedCollege {
   rating: number;
   minFees: number;
   ranking: number | null;
-  placements: Array<{ averagePackage: number; highestPackage: number }>;
+  placements: Array<{ averagePackage: number; highestPackage: number; placementRate?: number }>;
   matchDetails: {
     exam: string;
     userRank: number;
@@ -179,6 +179,17 @@ function PredictorContent() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  const [copiedShare, setCopiedShare] = useState(false);
+
+  const handleSharePrediction = () => {
+    if (typeof window !== "undefined") {
+      const url = `${window.location.origin}/predictor?exam=${encodeURIComponent(exam)}&rank=${rank}&category=${category}${homeState !== "ALL" ? `&homeState=${encodeURIComponent(homeState)}` : ""}`;
+      navigator.clipboard.writeText(url);
+      setCopiedShare(true);
+      setTimeout(() => setCopiedShare(false), 2000);
+    }
   };
 
   return (
@@ -420,6 +431,26 @@ function PredictorContent() {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={handleSharePrediction}
+                className="text-xs font-semibold gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50 bg-white"
+                title="Copy shareable link for this prediction result"
+              >
+                {copiedShare ? (
+                  <>
+                    <CheckCheck className="h-3.5 w-3.5 text-emerald-600" />
+                    <span className="hidden sm:inline text-emerald-700">Link Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="h-3.5 w-3.5 text-slate-500" />
+                    <span className="hidden sm:inline">Share Match</span>
+                  </>
+                )}
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={exportPredictorCSV}
                 className="text-xs font-semibold gap-1.5 border-slate-200 text-slate-700 hover:bg-slate-50 bg-white"
                 title="Download admission probability recommendations as CSV"
@@ -435,6 +466,10 @@ function PredictorContent() {
             {filteredResults?.map((c) => {
               const chance = c.matchDetails.admissionChance;
               const isComparing = isInCompare(c.id);
+              const placement = c.placements[0];
+              const total4YrCost = (c.minFees || 0) * 4;
+              const avgSalary = (placement?.averagePackage || 0) * 100000;
+              const roiMultiple = total4YrCost > 0 && avgSalary > 0 ? (avgSalary / total4YrCost).toFixed(1) : null;
 
               return (
                 <div
@@ -490,9 +525,21 @@ function PredictorContent() {
                       <div className="flex justify-between items-center">
                         <span className="text-slate-500">Avg Placement CTC:</span>
                         <span className="font-bold text-blue-700">
-                          {c.placements[0] ? formatPackage(c.placements[0].averagePackage) : "₹14.5 LPA"}
+                          {placement ? formatPackage(placement.averagePackage) : "₹14.5 LPA"}
                         </span>
                       </div>
+                      {placement?.placementRate ? (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-500">Placement Success:</span>
+                          <span className="font-semibold text-emerald-700">{placement.placementRate.toFixed(0)}% Placed</span>
+                        </div>
+                      ) : null}
+                      {roiMultiple && parseFloat(roiMultiple) >= 1.0 ? (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-500">4-Yr ROI Multiple:</span>
+                          <span className="font-bold text-purple-700">{roiMultiple}x Return</span>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
 
