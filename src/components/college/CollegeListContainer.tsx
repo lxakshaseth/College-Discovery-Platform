@@ -31,19 +31,30 @@ export function CollegeListContainer({ colleges, total }: CollegeListContainerPr
       "Type",
       "Annual Tuition Fees",
       "Avg Placement CTC",
+      "Placement Rate",
+      "4-Year ROI Multiple",
       "Rating",
     ];
 
-    const rows = colleges.map((c) => [
-      `"${c.ranking ? `#${c.ranking}` : "N/A"}"`,
-      `"${c.name.replace(/"/g, '""')}"`,
-      `"${c.location}"`,
-      `"${c.state}"`,
-      `"${c.type}"`,
-      `"${formatCurrency(c.minFees)}"`,
-      `"${c.placements?.[0] ? formatPackage(c.placements[0].averagePackage) : "N/A"}"`,
-      `"${c.rating.toFixed(1)}"`,
-    ]);
+    const rows = colleges.map((c) => {
+      const p = c.placements?.[0];
+      const totalCost = (c.minFees || 0) * 4;
+      const salary = (p?.averagePackage || 0) * 100000;
+      const roi = totalCost > 0 && salary > 0 ? `${(salary / totalCost).toFixed(2)}x` : "N/A";
+
+      return [
+        `"${c.ranking ? `#${c.ranking}` : "N/A"}"`,
+        `"${c.name.replace(/"/g, '""')}"`,
+        `"${c.location}"`,
+        `"${c.state}"`,
+        `"${c.type}"`,
+        `"${formatCurrency(c.minFees)}"`,
+        `"${p ? formatPackage(p.averagePackage) : "N/A"}"`,
+        `"${p ? `${p.placementRate.toFixed(1)}%` : "N/A"}"`,
+        `"${roi}"`,
+        `"${c.rating.toFixed(1)}"`,
+      ];
+    });
 
     const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -163,7 +174,7 @@ export function CollegeListContainer({ colleges, total }: CollegeListContainerPr
                 <th className="p-3.5">College & Location</th>
                 <th className="p-3.5">Type</th>
                 <th className="p-3.5">Annual Fees</th>
-                <th className="p-3.5">Avg CTC</th>
+                <th className="p-3.5">Avg CTC & ROI</th>
                 <th className="p-3.5">Rating</th>
                 <th className="p-3.5 text-center">Actions</th>
               </tr>
@@ -171,7 +182,12 @@ export function CollegeListContainer({ colleges, total }: CollegeListContainerPr
             <tbody className="divide-y divide-slate-100 text-xs">
               {colleges.map((c) => {
                 const isComparing = isInCompare(c.id);
-                const avgCtc = c.placements?.[0]?.averagePackage;
+                const placement = c.placements?.[0];
+                const avgCtc = placement?.averagePackage;
+                const total4YrCost = (c.minFees || 0) * 4;
+                const avgSalaryRupees = (avgCtc || 0) * 100000;
+                const roiMultiple = total4YrCost > 0 && avgSalaryRupees > 0 ? (avgSalaryRupees / total4YrCost).toFixed(1) : null;
+
                 return (
                   <tr key={c.id} className="hover:bg-blue-50/30 transition">
                     {/* Rank */}
@@ -208,9 +224,21 @@ export function CollegeListContainer({ colleges, total }: CollegeListContainerPr
                       {formatCurrency(c.minFees)} / yr
                     </td>
 
-                    {/* Avg CTC */}
-                    <td className="p-3.5 font-bold text-blue-700">
-                      {avgCtc ? formatPackage(avgCtc) : "₹14.5 LPA"}
+                    {/* Avg CTC & ROI */}
+                    <td className="p-3.5">
+                      <div className="font-bold text-blue-700">
+                        {avgCtc ? formatPackage(avgCtc) : "₹14.5 LPA"}
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-medium flex items-center gap-1.5 mt-0.5">
+                        {placement?.placementRate ? (
+                          <span className="text-emerald-700 font-semibold">{placement.placementRate.toFixed(0)}% Placed</span>
+                        ) : null}
+                        {roiMultiple && parseFloat(roiMultiple) >= 1.5 ? (
+                          <span className="text-purple-700 font-bold bg-purple-50 px-1 rounded border border-purple-200">
+                            {roiMultiple}x ROI
+                          </span>
+                        ) : null}
+                      </div>
                     </td>
 
                     {/* Rating */}
