@@ -236,10 +236,83 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
         {/* Tab 1: Overview */}
         <TabsContent value="overview" className="space-y-6">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm space-y-6">
+            {/* Institutional Fast Facts & Metrics Snapshot */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                  <Building2 className="h-3.5 w-3.5 text-blue-600" />
+                  Institute Type
+                </span>
+                <div className="text-sm font-bold text-slate-900">
+                  {college.type === "PUBLIC" ? "Government / Autonomous" : "Private / Deemed"}
+                </div>
+                <p className="text-[10px] text-slate-500">NIRF Ranked Higher Ed</p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                  <Award className="h-3.5 w-3.5 text-amber-600" />
+                  Establishment
+                </span>
+                <div className="text-sm font-bold text-slate-900">
+                  Year {college.establishedYear}
+                </div>
+                <p className="text-[10px] text-slate-500">
+                  {new Date().getFullYear() - college.establishedYear}+ Years Legacy
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                  <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
+                  Placement Track
+                </span>
+                <div className="text-sm font-bold text-emerald-700">
+                  {latestPlacement ? `${latestPlacement.placementRate}% Placed` : "High Success"}
+                </div>
+                <p className="text-[10px] text-slate-500">
+                  Avg {latestPlacement ? formatPackage(latestPlacement.averagePackage) : "Competitive"}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                  <Star className="h-3.5 w-3.5 text-amber-500" />
+                  Student Rating
+                </span>
+                <div className="text-sm font-bold text-slate-900 flex items-center gap-1">
+                  <span>{college.rating.toFixed(1)}</span>
+                  <span className="text-xs font-normal text-slate-500">/ 5.0</span>
+                </div>
+                <p className="text-[10px] text-slate-500">{college._count.reviews} Verified Reviews</p>
+              </div>
+            </div>
+
             <div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">About {college.name}</h3>
               <p className="text-slate-700 leading-relaxed font-normal">{college.description}</p>
             </div>
+
+            {/* Approvals & Accreditations */}
+            {approvals.length > 0 && (
+              <div className="rounded-xl bg-slate-50 p-4 border border-slate-200 space-y-2">
+                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <ShieldCheck className="h-4 w-4 text-blue-600" />
+                  Government Approvals & Accreditations
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {approvals.map((appr: string, idx: number) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-slate-800 bg-white border border-slate-200 px-2.5 py-1 rounded-lg shadow-2xs"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                      {appr}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Accepted Entrance Exams */}
             {examsAccepted.length > 0 && (
