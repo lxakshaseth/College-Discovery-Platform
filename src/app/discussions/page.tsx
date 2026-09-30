@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { MessageSquare, Plus, ThumbsUp, Send, User, Building2, Search, CheckCircle2, Sparkles, MessageCircle, Share2, Check, X } from "lucide-react";
+import { MessageSquare, Plus, ThumbsUp, Send, User, Building2, Search, CheckCircle2, Sparkles, MessageCircle, Share2, Check, X, HelpCircle, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -303,11 +303,71 @@ export default function DiscussionsPage() {
 
         <Button
           onClick={() => setShowAskForm(!showAskForm)}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold gap-2 shadow-sm whitespace-nowrap self-start sm:self-auto"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold gap-2 shadow-sm whitespace-nowrap self-start sm:self-auto cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           {showAskForm ? "Close Form" : "Ask a Question"}
         </Button>
+      </div>
+
+      {/* Community Activity Snapshot Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+            <HelpCircle className="h-3.5 w-3.5 text-blue-600" />
+            Total Inquiries
+          </span>
+          <div className="text-lg font-bold text-slate-900">{questions.length} Questions</div>
+          <p className="text-[11px] text-slate-500">Across colleges & exams</p>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+            Resolution Rate
+          </span>
+          <div className="text-lg font-bold text-emerald-700">
+            {questions.length > 0
+              ? `${Math.round(((questions.length - unansweredCount) / questions.length) * 100)}% Answered`
+              : "100%"}
+          </div>
+          <p className="text-[11px] text-slate-500">
+            {questions.length - unansweredCount} resolved inquiries
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+            <Users className="h-3.5 w-3.5 text-purple-600" />
+            Student Answers
+          </span>
+          <div className="text-lg font-bold text-purple-800">
+            {questions.reduce((acc, q) => acc + q.answers.length, 0)} Verified Replies
+          </div>
+          <p className="text-[11px] text-slate-500">From verified peers & alumni</p>
+        </div>
+
+        <div
+          onClick={() => setUnansweredOnly(!unansweredOnly)}
+          className={`rounded-xl border p-3.5 shadow-2xs space-y-1 cursor-pointer transition ${
+            unansweredOnly
+              ? "border-amber-400 bg-amber-50/70"
+              : "border-slate-200 bg-white hover:border-amber-300"
+          }`}
+          title="Click to toggle unanswered questions filter"
+        >
+          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1">
+            <Sparkles className="h-3.5 w-3.5 text-amber-600" />
+            Unanswered Doubts
+          </span>
+          <div className="text-lg font-bold text-amber-800 flex items-center justify-between">
+            <span>{unansweredCount} Awaiting</span>
+            <span className="text-[10px] font-semibold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+              {unansweredOnly ? "Active" : "Filter"}
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-500">Help fellow aspirants answer</p>
+        </div>
       </div>
 
       {/* Ask Question Card */}
