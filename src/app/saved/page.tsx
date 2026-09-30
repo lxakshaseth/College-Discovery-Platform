@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Bookmark, Scale, Trash2, ArrowUpRight, GraduationCap, Lock, Download, Share2, Check } from "lucide-react";
+import { Bookmark, Scale, Trash2, ArrowUpRight, GraduationCap, Lock, Download, Share2, Check, Trophy, Star, TrendingUp, Sparkles, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -42,6 +42,19 @@ export default function SavedPage() {
   const averageWishlistTuition = savedColleges.length > 0
     ? Math.round(savedColleges.reduce((acc, curr) => acc + (curr.college.minFees || 0), 0) / savedColleges.length)
     : 0;
+
+  const highestWishlistPackage = savedColleges.reduce((max, curr) => {
+    const pkg = (curr.college as any).placements?.[0]?.averagePackage || 0;
+    return pkg > max ? pkg : max;
+  }, 0);
+
+  const topRankedWishlist = savedColleges
+    .filter((s) => s.college.ranking)
+    .sort((a, b) => (a.college.ranking || 999) - (b.college.ranking || 999))[0]?.college;
+
+  const averageWishlistRating = savedColleges.length > 0
+    ? (savedColleges.reduce((acc, curr) => acc + (curr.college.rating || 0), 0) / savedColleges.length).toFixed(1)
+    : "0.0";
 
   const exportWishlistCSV = () => {
     if (typeof window === "undefined" || savedColleges.length === 0) return;
@@ -224,7 +237,53 @@ export default function SavedPage() {
           {/* Saved Colleges Tab */}
           <TabsContent value="colleges" className="space-y-4">
             {savedColleges.length > 0 && (
-              <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-3 rounded-xl border border-gray-200">
+              <>
+                {/* Wishlist Analytics Snapshot */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                      <Bookmark className="h-3.5 w-3.5 text-blue-600" />
+                      Saved Colleges
+                    </span>
+                    <div className="text-lg font-bold text-slate-900">{savedColleges.length} Shortlisted</div>
+                    <p className="text-[11px] text-slate-500">Across preferred states</p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                      <GraduationCap className="h-3.5 w-3.5 text-blue-700" />
+                      Avg Annual Tuition
+                    </span>
+                    <div className="text-lg font-bold text-blue-900">{formatCurrency(averageWishlistTuition)} / yr</div>
+                    <p className="text-[11px] text-slate-500">Base academic fee</p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                      <TrendingUp className="h-3.5 w-3.5 text-emerald-600" />
+                      Highest Avg CTC
+                    </span>
+                    <div className="text-lg font-bold text-emerald-700">
+                      {highestWishlistPackage > 0 ? formatPackage(highestWishlistPackage) : "N/A"}
+                    </div>
+                    <p className="text-[11px] text-slate-500">Top placement package</p>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                      <Trophy className="h-3.5 w-3.5 text-amber-500" />
+                      Top NIRF Rank
+                    </span>
+                    <div className="text-lg font-bold text-slate-900 line-clamp-1">
+                      {topRankedWishlist?.ranking ? `#${topRankedWishlist.ranking}` : "Premier"}
+                    </div>
+                    <p className="text-[11px] text-slate-500 line-clamp-1">
+                      {topRankedWishlist?.name || "Ranked Institutions"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-3 rounded-xl border border-gray-200">
                 <input
                   type="text"
                   placeholder="Filter saved colleges by name or city..."
@@ -293,6 +352,7 @@ export default function SavedPage() {
                   </Button>
                 </div>
               </div>
+              </>
             )}
 
             {savedColleges.length === 0 ? (
