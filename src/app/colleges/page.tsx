@@ -77,10 +77,14 @@ export default async function CollegesPage({ searchParams }: CollegesPageProps) 
     orderBy = { minFees: "desc" };
   } else if (sortBy === "reviews") {
     orderBy = { reviews: { _count: "desc" } };
+  } else if (sortBy === "courses") {
+    orderBy = { courses: { _count: "desc" } };
   } else if (sortBy === "name") {
     orderBy = { name: "asc" };
   } else if (sortBy === "established") {
     orderBy = { establishedYear: "asc" };
+  } else if (sortBy === "established_desc") {
+    orderBy = { establishedYear: "desc" };
   }
 
   const skip = (page - 1) * limit;
