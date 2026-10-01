@@ -108,6 +108,12 @@ export function CollegeListContainer({ colleges, total }: CollegeListContainerPr
           <Link href="/colleges?exam=BITSAT" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 transition">
             BITSAT
           </Link>
+          <Link href="/colleges?sortBy=courses" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 transition">
+            📚 Programs
+          </Link>
+          <Link href="/colleges?sortBy=established_desc" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 transition">
+            🚀 Modern
+          </Link>
           <Link href="/colleges?type=PUBLIC" className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 transition">
             Govt
           </Link>
@@ -206,9 +212,19 @@ export function CollegeListContainer({ colleges, total }: CollegeListContainerPr
                       <Link href={`/colleges/${c.slug}`} className="font-bold text-sm text-slate-900 hover:text-blue-600 transition block truncate">
                         {c.name}
                       </Link>
-                      <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                        <MapPin className="h-3 w-3 text-slate-400" />
-                        {c.location}, {c.state} • Estd {c.establishedYear}
+                      <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 flex-wrap">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3 text-slate-400" />
+                          {c.location}, {c.state}
+                        </span>
+                        <span>•</span>
+                        <span>Estd {c.establishedYear}</span>
+                        {c._count?.courses ? (
+                          <>
+                            <span>•</span>
+                            <span className="text-blue-600 font-medium">{c._count.courses} Courses</span>
+                          </>
+                        ) : null}
                       </div>
                     </td>
 
