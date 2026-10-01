@@ -7,7 +7,7 @@ export const collegeSearchSchema = z.object({
   minFees: z.preprocess((v) => (v === "" || v === undefined ? undefined : Number(v)), z.number().min(0).optional()),
   maxFees: z.preprocess((v) => (v === "" || v === undefined ? undefined : Number(v)), z.number().min(0).optional()),
   minRating: z.preprocess((v) => (v === "" || v === "ALL" || v === undefined ? undefined : Number(v)), z.number().min(0).max(5).optional()),
-  sortBy: z.enum(["rating", "fees", "name", "ranking", "established"]).optional(),
+  sortBy: z.enum(["rating", "fees", "fees_desc", "reviews", "name", "ranking", "established", "established_desc", "courses"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(50).default(12),

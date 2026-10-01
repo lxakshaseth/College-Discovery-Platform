@@ -60,6 +60,15 @@ export async function GET(req: NextRequest) {
         case "fees":
           orderBy = { minFees: order };
           break;
+        case "fees_desc":
+          orderBy = { minFees: "desc" };
+          break;
+        case "reviews":
+          orderBy = { reviews: { _count: "desc" } };
+          break;
+        case "courses":
+          orderBy = { courses: { _count: "desc" } };
+          break;
         case "name":
           orderBy = { name: order };
           break;
@@ -68,6 +77,9 @@ export async function GET(req: NextRequest) {
           break;
         case "established":
           orderBy = { establishedYear: order === "desc" ? "desc" : "asc" };
+          break;
+        case "established_desc":
+          orderBy = { establishedYear: "desc" };
           break;
       }
     }
