@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, TrendingUp, DollarSign, Clock, Award, ShieldCheck, Landmark, ChevronDown, ChevronUp, AlertCircle, Percent } from "lucide-react";
+import { Calculator, TrendingUp, DollarSign, Clock, Award, ShieldCheck, Landmark, ChevronDown, ChevronUp, AlertCircle, Percent, Share2, Check, Download, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +29,7 @@ export function RoiCalculator({
   const [scholarshipPercent, setScholarshipPercent] = useState(0);
   const [expectedSalaryLpa, setExpectedSalaryLpa] = useState<number>(defaultAvg);
   const [annualHikePercent, setAnnualHikePercent] = useState<number>(10);
+  const [copiedReport, setCopiedReport] = useState(false);
 
   // Education Loan EMI States
   const [showLoanSection, setShowLoanSection] = useState(false);
@@ -80,21 +81,60 @@ export function RoiCalculator({
   const roiMultiplier = totalInvestment > 0 ? (fiveYearEarnings / totalInvestment).toFixed(1) : "0";
   const netWealthCreated = Math.max(0, fiveYearEarnings - totalInvestment);
 
+  const copyReportToClipboard = () => {
+    if (typeof window === "undefined") return;
+    const text = `ROI & Financial Feasibility Analysis for ${collegeName}:
+- Course Duration: ${durationYears} Years
+- Total Cost (Tuition + Living): ${formatCurrency(totalInvestment)}
+- Starting Expected CTC: ${expectedSalaryLpa} LPA (In-Hand: ${formatCurrency(monthlySalaryInHand)}/mo)
+- Estimated Payback Period: ${paybackYears} Years
+- 5-Year Cumulative In-Hand Earnings: ${formatCurrency(fiveYearEarnings)}
+- 5-Year Net Wealth Created: ${formatCurrency(netWealthCreated)}
+- 5-Year ROI Multiplier: ${roiMultiplier}x
+${showLoanSection ? `- Monthly Education Loan EMI: ${formatCurrency(monthlyEmi)}/mo (${emiBurdenPercent}% of in-hand)` : ""}`;
+
+    navigator.clipboard.writeText(text);
+    setCopiedReport(true);
+    setTimeout(() => setCopiedReport(false), 2000);
+  };
+
   return (
     <Card className="border-blue-100 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/30 shadow-sm overflow-hidden">
       <CardHeader className="border-b border-blue-100 bg-white/70 pb-4">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-blue-600 text-white">
-            <Calculator className="h-5 w-5" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-blue-600 text-white">
+              <Calculator className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle className="text-lg font-bold text-slate-900">
+                Interactive ROI & Degree Cost Estimator
+              </CardTitle>
+              <p className="text-xs text-slate-500">
+                Calculate total 4-year expenditure vs expected salary return for {collegeName}.
+              </p>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-lg font-bold text-slate-900">
-              Interactive ROI & Degree Cost Estimator
-            </CardTitle>
-            <p className="text-xs text-slate-500">
-              Calculate total 4-year expenditure vs expected salary return for {collegeName}.
-            </p>
-          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={copyReportToClipboard}
+            className="text-xs font-semibold gap-1.5 border-blue-200 bg-white text-blue-700 hover:bg-blue-50 shrink-0 self-start sm:self-auto"
+            title="Copy structured ROI breakdown to clipboard"
+          >
+            {copiedReport ? (
+              <>
+                <Check className="h-3.5 w-3.5 text-emerald-600" />
+                Report Copied!
+              </>
+            ) : (
+              <>
+                <Share2 className="h-3.5 w-3.5" />
+                Copy ROI Summary
+              </>
+            )}
+          </Button>
         </div>
       </CardHeader>
 
@@ -102,7 +142,25 @@ export function RoiCalculator({
         {/* Controls Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-slate-700">Course Duration (Years)</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold text-slate-700">Course Duration (Years)</Label>
+              <div className="flex items-center gap-1">
+                {[3, 4, 5].map((yr) => (
+                  <button
+                    key={yr}
+                    type="button"
+                    onClick={() => setDurationYears(yr)}
+                    className={`text-[10px] px-1.5 py-0.5 rounded font-semibold transition ${
+                      durationYears === yr
+                        ? "bg-blue-600 text-white"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {yr}Y
+                  </button>
+                ))}
+              </div>
+            </div>
             <Input
               type="number"
               min={1}
@@ -138,7 +196,25 @@ export function RoiCalculator({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-slate-700">Scholarship / Fee Waiver (%)</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold text-slate-700">Scholarship / Fee Waiver (%)</Label>
+              <div className="flex items-center gap-1">
+                {[0, 25, 50, 100].map((sc) => (
+                  <button
+                    key={sc}
+                    type="button"
+                    onClick={() => setScholarshipPercent(sc)}
+                    className={`text-[10px] px-1.5 py-0.5 rounded font-semibold transition ${
+                      scholarshipPercent === sc
+                        ? "bg-blue-600 text-white"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {sc}%
+                  </button>
+                ))}
+              </div>
+            </div>
             <Input
               type="number"
               min={0}
