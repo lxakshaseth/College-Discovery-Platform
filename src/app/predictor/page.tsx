@@ -375,6 +375,108 @@ function PredictorContent() {
                 <span className="font-bold text-slate-900">{results.length}</span> recommended institutions
               </p>
             </div>
+          </div>
+
+          {/* 4-Card Admission Probability Snapshot Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <button
+              type="button"
+              onClick={() => setTierFilter("ALL")}
+              className={`rounded-xl border p-3.5 text-left transition shadow-2xs ${
+                tierFilter === "ALL"
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : "border-slate-200 bg-white hover:border-slate-300 text-slate-800"
+              }`}
+            >
+              <span className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                tierFilter === "ALL" ? "text-slate-300" : "text-slate-400"
+              }`}>
+                <Trophy className="h-3.5 w-3.5 text-amber-400" />
+                Total Matched
+              </span>
+              <div className="text-lg font-bold mt-1">{results.length} Colleges</div>
+              <p className={`text-[11px] mt-0.5 ${
+                tierFilter === "ALL" ? "text-slate-300" : "text-slate-500"
+              }`}>
+                All probability tiers
+              </p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTierFilter("HIGH")}
+              className={`rounded-xl border p-3.5 text-left transition shadow-2xs ${
+                tierFilter === "HIGH"
+                  ? "border-emerald-600 bg-emerald-600 text-white"
+                  : "border-slate-200 bg-white hover:border-emerald-300 text-slate-800"
+              }`}
+            >
+              <span className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                tierFilter === "HIGH" ? "text-emerald-100" : "text-emerald-600"
+              }`}>
+                <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
+                Safe Tier
+              </span>
+              <div className="text-lg font-bold mt-1">{highChanceCount} Colleges</div>
+              <p className={`text-[11px] mt-0.5 ${
+                tierFilter === "HIGH" ? "text-emerald-100" : "text-slate-500"
+              }`}>
+                High admission chance
+              </p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTierFilter("MEDIUM")}
+              className={`rounded-xl border p-3.5 text-left transition shadow-2xs ${
+                tierFilter === "MEDIUM"
+                  ? "border-amber-600 bg-amber-600 text-white"
+                  : "border-slate-200 bg-white hover:border-amber-300 text-slate-800"
+              }`}
+            >
+              <span className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                tierFilter === "MEDIUM" ? "text-amber-100" : "text-amber-600"
+              }`}>
+                <Target className="h-3.5 w-3.5 text-amber-500" />
+                Target Tier
+              </span>
+              <div className="text-lg font-bold mt-1">{mediumChanceCount} Colleges</div>
+              <p className={`text-[11px] mt-0.5 ${
+                tierFilter === "MEDIUM" ? "text-amber-100" : "text-slate-500"
+              }`}>
+                Moderate competitive
+              </p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTierFilter("LOW")}
+              className={`rounded-xl border p-3.5 text-left transition shadow-2xs ${
+                tierFilter === "LOW"
+                  ? "border-purple-600 bg-purple-600 text-white"
+                  : "border-slate-200 bg-white hover:border-purple-300 text-slate-800"
+              }`}
+            >
+              <span className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                tierFilter === "LOW" ? "text-purple-100" : "text-purple-600"
+              }`}>
+                <Compass className="h-3.5 w-3.5 text-purple-500" />
+                Dream Tier
+              </span>
+              <div className="text-lg font-bold mt-1">{lowChanceCount} Colleges</div>
+              <p className={`text-[11px] mt-0.5 ${
+                tierFilter === "LOW" ? "text-purple-100" : "text-slate-500"
+              }`}>
+                Ambitious reach choices
+              </p>
+            </button>
+          </div>
+
+          {/* Results Action Toolbar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+            <span className="text-xs text-slate-500 font-semibold">
+              Showing <span className="text-slate-900 font-bold">{filteredResults?.length || 0}</span> matching institutions
+            </span>
 
             <div className="flex items-center gap-2 flex-wrap">
               {/* Tier Filters */}

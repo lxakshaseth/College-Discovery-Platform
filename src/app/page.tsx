@@ -165,6 +165,89 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Popular Comparison Matchups Showcase */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Scale className="h-6 w-6 text-purple-600" />
+              Trending College Matchups & Comparisons
+            </h2>
+            <p className="text-xs text-gray-500 mt-1">
+              Compare fees, NIRF rank, average CTC packages, and campus life head-to-head
+            </p>
+          </div>
+
+          <Link href="/compare">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs text-purple-600 border-purple-200 hover:bg-purple-50">
+              Open Compare Matrix
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            {
+              title: "IIT Bombay vs IIT Delhi",
+              tag: "NIRF Top 2",
+              desc: "Compare Maharashtra vs Delhi tech giant placements, packages & cutoffs.",
+            },
+            {
+              title: "BITS Pilani vs NIT Trichy",
+              tag: "Private vs Govt",
+              desc: "Premier BITSAT institution vs India's #1 Ranked National Institute of Tech.",
+            },
+            {
+              title: "IIT Madras vs IIT Kharagpur",
+              tag: "NIRF #1 vs Oldest",
+              desc: "India's highest ranked institute vs the largest historic IIT campus.",
+            },
+            {
+              title: "IIIT Hyderabad vs BITS Pilani",
+              tag: "CS Elite",
+              desc: "High competitive coding & research culture vs premier private giant.",
+            },
+            {
+              title: "DTU Delhi vs NSUT Delhi",
+              tag: "Delhi State",
+              desc: "Delhi state JAC counseling giants compared for placements and campus size.",
+            },
+            {
+              title: "NIT Surathkal vs NIT Warangal",
+              tag: "Top South NITs",
+              desc: "Karnataka coastal institute vs Telangana top engineering powerhouse.",
+            },
+          ].map((item, idx) => (
+            <Link
+              key={idx}
+              href="/compare"
+              className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:border-purple-300 hover:shadow-md transition flex flex-col justify-between space-y-3"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                    {item.tag}
+                  </span>
+                  <span className="text-xs text-slate-400 font-medium">Head-to-Head</span>
+                </div>
+                <h3 className="font-bold text-base text-slate-900 group-hover:text-purple-600 transition">
+                  {item.title}
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-purple-600 group-hover:underline">
+                <span>Compare Matrix</span>
+                <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Explore Colleges by State Hubs */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center justify-between">
