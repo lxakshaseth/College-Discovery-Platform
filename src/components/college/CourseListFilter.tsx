@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, BookOpen, Sparkles, Filter } from "lucide-react";
+import { Search, BookOpen, Sparkles, Filter, Download, ArrowUpDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,24 +26,67 @@ interface CourseListFilterProps {
 export function CourseListFilter({ courses, collegeSlug, primaryExam = "JEE Main", collegeState = "" }: CourseListFilterProps) {
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState<string>("ALL");
+  const [sortBy, setSortBy] = useState<"default" | "fees_asc" | "fees_desc" | "name" | "duration">("default");
 
   const availableTypes = useMemo(() => {
     const types = Array.from(new Set(courses.map((c) => c.type).filter(Boolean)));
     return ["ALL", ...types];
   }, [courses]);
 
+  const exportCoursesCSV = () => {
+    if (typeof window === "undefined" || courses.length === 0) return;
+
+    const headers = ["Program Name", "Degree Level", "Duration", "Annual Tuition Fee (₹)", "Total Estimated Fees (₹)"];
+    const rows = filteredCourses.map((c) => {
+      const durationYears = parseInt(c.duration) || (c.type === "UG" ? 4 : 2);
+      const totalEstimatedFees = c.fees * durationYears;
+      return [
+        `"${c.name.replace(/"/g, '""')}"`,
+        `"${c.type}"`,
+        `"${c.duration}"`,
+        `"${c.fees}"`,
+        `"${totalEstimatedFees}"`,
+      ];
+    });
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${collegeSlug}_courses_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const filteredCourses = useMemo(() => {
-    return courses.filter((course) => {
+    let list = courses.filter((course) => {
       const matchesSearch = !search.trim() || course.name.toLowerCase().includes(search.toLowerCase());
       const matchesType = selectedType === "ALL" || course.type.toUpperCase() === selectedType.toUpperCase();
       return matchesSearch && matchesType;
     });
-  }, [courses, search, selectedType]);
+
+    return list.sort((a, b) => {
+      if (sortBy === "fees_asc") return a.fees - b.fees;
+      if (sortBy === "fees_desc") return b.fees - a.fees;
+      if (sortBy === "name") return a.name.localeCompare(b.name);
+      if (sortBy === "duration") return parseInt(b.duration || "0") - parseInt(a.duration || "0");
+      return 0;
+    });
+  }, [courses, search, selectedType, sortBy]);
+
+  const avgAnnualFees = useMemo(() => {
+    if (filteredCourses.length === 0) return 0;
+    const total = filteredCourses.reduce((acc, c) => acc + (c.fees || 0), 0);
+    return Math.round(total / filteredCourses.length);
+  }, [filteredCourses]);
 
   return (
     <div className="space-y-4">
       {/* Search and Type Filter Controls */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
@@ -54,36 +97,78 @@ export function CourseListFilter({ courses, collegeSlug, primaryExam = "JEE Main
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] font-semibold text-slate-500 mr-1 flex items-center gap-1">
-            <Filter className="h-3 w-3" /> Degree Level:
-          </span>
-          {availableTypes.map((type) => (
-            <button
-              key={type}
-              onClick={() => setSelectedType(type)}
-              className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition ${
-                selectedType === type
-                  ? "bg-blue-600 text-white shadow-xs"
-                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
-              }`}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Degree Level Filter */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-semibold text-slate-500 mr-1 flex items-center gap-1">
+              <Filter className="h-3 w-3" /> Degree:
+            </span>
+            {availableTypes.map((type) => (
+              <button
+                key={type}
+                onClick={() => setSelectedType(type)}
+                className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition ${
+                  selectedType === type
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                {type === "ALL" ? "All" : type}
+              </button>
+            ))}
+          </div>
+
+          {/* Sort Selector */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-xs text-slate-500 font-medium flex items-center gap-1">
+              <ArrowUpDown className="h-3.5 w-3.5" />
+            </span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              aria-label="Sort courses by"
+              className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer h-8"
             >
-              {type === "ALL" ? "All Programs" : type}
-            </button>
-          ))}
+              <option value="default">Default Order</option>
+              <option value="fees_asc">Lowest Fees</option>
+              <option value="fees_desc">Highest Fees</option>
+              <option value="name">Name (A-Z)</option>
+              <option value="duration">Longest Duration</option>
+            </select>
+          </div>
+
+          {/* Export CSV Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportCoursesCSV}
+            className="h-8 text-xs font-semibold gap-1 border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shrink-0"
+            title="Download programs curriculum and fees matrix as CSV spreadsheet"
+          >
+            <Download className="h-3.5 w-3.5 text-slate-500" />
+            <span className="hidden sm:inline">Export</span>
+          </Button>
         </div>
       </div>
 
-      {/* Results Count */}
-      <div className="flex items-center justify-between text-xs text-slate-500 px-1">
-        <span>
-          Showing <span className="font-bold text-slate-900">{filteredCourses.length}</span> of {courses.length} academic programs
-        </span>
-        {(search || selectedType !== "ALL") && (
+      {/* Results Count & Avg Tuition Strip */}
+      <div className="flex items-center justify-between text-xs text-slate-500 px-1 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <span>
+            Showing <span className="font-bold text-slate-900">{filteredCourses.length}</span> of {courses.length} academic programs
+          </span>
+          {avgAnnualFees > 0 && (
+            <span className="text-[11px] bg-blue-50 text-blue-800 font-semibold px-2 py-0.5 rounded border border-blue-200">
+              Avg Tuition: {formatCurrency(avgAnnualFees)} / yr
+            </span>
+          )}
+        </div>
+        {(search || selectedType !== "ALL" || sortBy !== "default") && (
           <button
             onClick={() => {
               setSearch("");
               setSelectedType("ALL");
+              setSortBy("default");
             }}
             className="text-blue-600 hover:underline font-semibold text-[11px]"
           >
