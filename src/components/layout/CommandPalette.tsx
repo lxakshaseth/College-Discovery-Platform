@@ -2,13 +2,23 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Sparkles, Scale, GraduationCap, ArrowRight, X, Bookmark, MessageSquare } from "lucide-react";
+import { Search, Sparkles, Scale, GraduationCap, ArrowRight, X, Bookmark, MessageSquare, Trophy, Building2 } from "lucide-react";
 import { CollegeListItem } from "@/types";
 
 interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+const QUICK_ACTIONS = [
+  { name: "Rank & Admission Predictor", desc: "Calculate cutoff probability across 50+ institutes", path: "/predictor", icon: Sparkles, iconBg: "bg-amber-100 text-amber-700", hoverColor: "group-hover:text-amber-700" },
+  { name: "College Comparison Matrix", desc: "Compare fees, salary CTC & NIRF ranks side-by-side", path: "/compare", icon: Scale, iconBg: "bg-blue-100 text-blue-700", hoverColor: "group-hover:text-blue-700" },
+  { name: "Explore All Colleges Directory", desc: "Browse 50+ NIRF ranked institutes with full filters", path: "/colleges", icon: Search, iconBg: "bg-emerald-100 text-emerald-700", hoverColor: "group-hover:text-emerald-700" },
+  { name: "Top NIRF Ranked Institutes", desc: "View India's top ranked engineering powerhouses", path: "/colleges?sortBy=ranking", icon: Trophy, iconBg: "bg-amber-100 text-amber-800", hoverColor: "group-hover:text-amber-800" },
+  { name: "Government IITs & NITs", desc: "Direct filter for public autonomous engineering colleges", path: "/colleges?type=PUBLIC", icon: Building2, iconBg: "bg-blue-100 text-blue-800", hoverColor: "group-hover:text-blue-800" },
+  { name: "Community Q&A Forum", desc: "Ask seniors about cutoffs, campus life & hostels", path: "/discussions", icon: MessageSquare, iconBg: "bg-purple-100 text-purple-700", hoverColor: "group-hover:text-purple-700" },
+  { name: "Saved Wishlist & Comparisons", desc: "View your bookmarked colleges and saved sessions", path: "/saved", icon: Bookmark, iconBg: "bg-slate-100 text-slate-700", hoverColor: "group-hover:text-slate-900" },
+];
 
 export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const router = useRouter();
@@ -44,7 +54,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
       }
       if (!isOpen) return;
 
-      const totalItems = query.trim() ? results.length : 4;
+      const totalItems = query.trim() ? results.length : QUICK_ACTIONS.length;
 
       if (e.key === "ArrowDown") {
         e.preventDefault();
@@ -56,11 +66,8 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
         e.preventDefault();
         if (query.trim() && results[selectedIndex]) {
           navigateTo(`/colleges/${results[selectedIndex].slug}`);
-        } else if (!query.trim()) {
-          const quickPaths = ["/predictor", "/compare", "/discussions", "/saved"];
-          if (quickPaths[selectedIndex]) {
-            navigateTo(quickPaths[selectedIndex]);
-          }
+        } else if (!query.trim() && QUICK_ACTIONS[selectedIndex]) {
+          navigateTo(QUICK_ACTIONS[selectedIndex].path);
         }
       }
     };
@@ -175,86 +182,35 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           ) : (
             <div>
               <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Quick Navigation & Tools
+                Quick Navigation & Tools ({QUICK_ACTIONS.length})
               </div>
               <div className="space-y-1">
-                <button
-                  onClick={() => navigateTo("/predictor")}
-                  className={`w-full p-2.5 rounded-xl text-left transition flex items-center justify-between group ${
-                    selectedIndex === 0 ? "bg-amber-50 border border-amber-200" : "hover:bg-slate-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-amber-100 text-amber-700">
-                      <Sparkles className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-bold text-slate-900 group-hover:text-amber-700">
-                        Rank & Admission Predictor
+                {QUICK_ACTIONS.map((action, idx) => {
+                  const Icon = action.icon;
+                  const isSelected = selectedIndex === idx;
+                  return (
+                    <button
+                      key={action.path}
+                      onClick={() => navigateTo(action.path)}
+                      className={`w-full p-2.5 rounded-xl text-left transition flex items-center justify-between group ${
+                        isSelected ? "bg-slate-100 border border-slate-300 font-semibold" : "hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${action.iconBg}`}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <div className={`text-sm font-bold text-slate-900 transition ${action.hoverColor}`}>
+                            {action.name}
+                          </div>
+                          <div className="text-xs text-slate-500">{action.desc}</div>
+                        </div>
                       </div>
-                      <div className="text-xs text-slate-500">Calculate cutoff probability across 50+ institutes</div>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-amber-600" />
-                </button>
-
-                <button
-                  onClick={() => navigateTo("/compare")}
-                  className={`w-full p-2.5 rounded-xl text-left transition flex items-center justify-between group ${
-                    selectedIndex === 1 ? "bg-blue-50 border border-blue-200" : "hover:bg-slate-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-blue-100 text-blue-700">
-                      <Scale className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-bold text-slate-900 group-hover:text-blue-700">
-                        College Comparison Matrix
-                      </div>
-                      <div className="text-xs text-slate-500">Compare fees, salary CTC & NIRF ranks side-by-side</div>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-blue-600" />
-                </button>
-
-                <button
-                  onClick={() => navigateTo("/discussions")}
-                  className={`w-full p-2.5 rounded-xl text-left transition flex items-center justify-between group ${
-                    selectedIndex === 2 ? "bg-purple-50 border border-purple-200" : "hover:bg-slate-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-purple-100 text-purple-700">
-                      <MessageSquare className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-bold text-slate-900 group-hover:text-purple-700">
-                        Community Q&A Forum
-                      </div>
-                      <div className="text-xs text-slate-500">Ask seniors about cutoffs, campus life & hostels</div>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-purple-600" />
-                </button>
-
-                <button
-                  onClick={() => navigateTo("/saved")}
-                  className={`w-full p-2.5 rounded-xl text-left transition flex items-center justify-between group ${
-                    selectedIndex === 3 ? "bg-slate-100 border border-slate-300" : "hover:bg-slate-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-slate-100 text-slate-700">
-                      <Bookmark className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-bold text-slate-900">Saved Wishlist & Comparisons</div>
-                      <div className="text-xs text-slate-500">View your bookmarked colleges and saved sessions</div>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-slate-600" />
-                </button>
+                      <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-slate-700 transition" />
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
