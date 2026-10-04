@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { MessageSquare, Plus, ThumbsUp, Send, User, Building2, Search, CheckCircle2, Sparkles, MessageCircle, Share2, Check, X, HelpCircle, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,8 +44,9 @@ interface QuestionItem {
   answers: AnswerItem[];
 }
 
-export default function DiscussionsPage() {
+function DiscussionsContent() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,6 +60,18 @@ export default function DiscussionsPage() {
   const [askCollegeId, setAskCollegeId] = useState("GENERAL");
   const [submittingQuestion, setSubmittingQuestion] = useState(false);
   const [questionError, setQuestionError] = useState("");
+
+  useEffect(() => {
+    const qCollegeId = searchParams.get("collegeId");
+    const qAsk = searchParams.get("ask");
+    if (qCollegeId) {
+      setSelectedCollege(qCollegeId);
+      setAskCollegeId(qCollegeId);
+    }
+    if (qAsk === "true") {
+      setShowAskForm(true);
+    }
+  }, [searchParams]);
 
   // Answer submitting state mapped by question ID
   const [activeAnswerBox, setActiveAnswerBox] = useState<string | null>(null);
@@ -759,5 +773,13 @@ export default function DiscussionsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function DiscussionsPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-slate-500 text-sm">Loading Community Discussions...</div>}>
+      <DiscussionsContent />
+    </Suspense>
   );
 }

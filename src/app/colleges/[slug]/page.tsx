@@ -555,8 +555,8 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
                 <p className="text-xs text-slate-500">Ask senior students and alumni about life and admissions at this campus.</p>
               </div>
 
-              <Link href="/discussions">
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs gap-1.5">
+              <Link href={`/discussions?collegeId=${college.id}&ask=true`}>
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs gap-1.5 shadow-2xs">
                   Ask Question on Forum
                 </Button>
               </Link>
@@ -582,13 +582,25 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
                         <p className="text-xs text-slate-700">{q.answers[0].content}</p>
                       </div>
                     )}
+
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[11px]">
+                      <span className="text-slate-500 font-medium">
+                        {q.answers?.length || 0} {q.answers?.length === 1 ? "Community Answer" : "Community Answers"}
+                      </span>
+                      <Link
+                        href={`/discussions#q-${q.id}`}
+                        className="font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 hover:underline"
+                      >
+                        Join Discussion <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="p-8 text-center text-slate-500 space-y-2">
                 <p className="text-sm">No questions asked yet for this college.</p>
-                <Link href="/discussions">
+                <Link href={`/discussions?collegeId=${college.id}&ask=true`}>
                   <Button size="sm" variant="outline" className="text-xs font-semibold">
                     Be the First to Ask a Question
                   </Button>
