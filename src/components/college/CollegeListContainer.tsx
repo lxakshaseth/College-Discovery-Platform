@@ -80,6 +80,23 @@ export function CollegeListContainer({ colleges, total }: CollegeListContainerPr
     }
   };
 
+  const publicCount = colleges.filter((c) => c.type === "PUBLIC").length;
+  const privateCount = colleges.filter((c) => c.type === "PRIVATE" || c.type === "DEEMED").length;
+
+  const collegesWithFees = colleges.filter((c) => c.minFees > 0);
+  const avgFilteredFees = collegesWithFees.length > 0
+    ? Math.round(collegesWithFees.reduce((acc, c) => acc + c.minFees, 0) / collegesWithFees.length)
+    : 0;
+
+  const placementsList = colleges.map((c) => c.placements?.[0]).filter(Boolean);
+  const avgFilteredCtc = placementsList.length > 0
+    ? (placementsList.reduce((acc, p) => acc + (p?.averagePackage || 0), 0) / placementsList.length).toFixed(1)
+    : null;
+
+  const maxFilteredCtc = placementsList.length > 0
+    ? Math.max(...placementsList.map((p) => p?.highestPackage || 0))
+    : null;
+
   return (
     <div className="space-y-4">
       {/* Top Action Toolbar: Quick Category Chips + View Switcher */}
@@ -163,6 +180,48 @@ export function CollegeListContainer({ colleges, total }: CollegeListContainerPr
           </div>
         </div>
       </div>
+
+      {/* Dynamic Filter Analytics Snapshot Bar */}
+      {colleges.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50/90 border border-slate-200 rounded-xl p-3 text-xs shadow-2xs">
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Avg Annual Tuition
+            </span>
+            <div className="font-extrabold text-slate-900 text-sm">
+              {avgFilteredFees > 0 ? `${formatCurrency(avgFilteredFees)}/yr` : "N/A"}
+            </div>
+          </div>
+
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Avg Placement CTC
+            </span>
+            <div className="font-extrabold text-blue-700 text-sm">
+              {avgFilteredCtc ? `₹${avgFilteredCtc} LPA` : "N/A"}
+            </div>
+          </div>
+
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Peak Highest CTC
+            </span>
+            <div className="font-extrabold text-emerald-700 text-sm">
+              {maxFilteredCtc && maxFilteredCtc > 0 ? `₹${maxFilteredCtc} LPA` : "N/A"}
+            </div>
+          </div>
+
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Type Breakdown
+            </span>
+            <div className="font-bold text-slate-800 text-xs mt-0.5">
+              <span className="text-blue-700 font-extrabold">{publicCount}</span> Govt •{" "}
+              <span className="text-purple-700 font-extrabold">{privateCount}</span> Private
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* View Mode: Card Grid vs Matrix Table */}
       {viewMode === "grid" ? (
