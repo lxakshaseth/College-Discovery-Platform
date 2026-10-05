@@ -14,6 +14,7 @@ import { PrintCollegeButton } from "@/components/college/PrintCollegeButton";
 import { AddToCompareDetailButton } from "@/components/college/AddToCompareDetailButton";
 import { CollegeCard } from "@/components/college/CollegeCard";
 import { CourseListFilter } from "@/components/college/CourseListFilter";
+import { PeerComparisonMatchups } from "@/components/college/PeerComparisonMatchups";
 
 export const dynamic = "force-dynamic";
 
@@ -403,6 +404,22 @@ export default async function CollegeDetailPage({ params }: CollegeDetailPagePro
                 ))}
               </div>
             </div>
+
+            {/* Peer Head-to-Head Comparison Matchups */}
+            {similarColleges && similarColleges.length > 0 && (
+              <PeerComparisonMatchups
+                currentCollege={{
+                  id: college.id,
+                  name: college.name,
+                  slug: college.slug,
+                  minFees: college.minFees,
+                  ranking: college.ranking,
+                  rating: college.rating,
+                  averagePackage: latestPlacement?.averagePackage,
+                }}
+                peers={similarColleges}
+              />
+            )}
           </div>
         </TabsContent>
 
