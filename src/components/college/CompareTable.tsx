@@ -1,20 +1,69 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Star, MapPin, Building, IndianRupee, Trophy, Check, X, Award, ExternalLink, Share2, CheckCheck, Download, TrendingUp } from "lucide-react";
-import { CompareCollege } from "@/types";
+import {
+  Star,
+  MapPin,
+  Building,
+  IndianRupee,
+  Trophy,
+  Check,
+  X,
+  Award,
+  ExternalLink,
+  Share2,
+  CheckCheck,
+  Download,
+  TrendingUp,
+  Plus,
+  Loader2,
+} from "lucide-react";
+import { CompareCollege, CollegeListItem } from "@/types";
 import { formatCurrency, formatPackage, safeJsonParse } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface CompareTableProps {
   colleges: CompareCollege[];
   onRemove?: (id: string) => void;
+  onAdd?: (college: CollegeListItem) => void;
 }
 
-export function CompareTable({ colleges, onRemove }: CompareTableProps) {
+export function CompareTable({ colleges, onRemove, onAdd }: CompareTableProps) {
   const [copied, setCopied] = useState(false);
+  const [slotSearch, setSlotSearch] = useState("");
+  const [slotResults, setSlotResults] = useState<CollegeListItem[]>([]);
+  const [slotSearching, setSlotSearching] = useState(false);
+  const [showSearchSlot, setShowSearchSlot] = useState(false);
+
+  useEffect(() => {
+    if (!slotSearch.trim()) {
+      setSlotResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setSlotSearching(true);
+      try {
+        const res = await fetch(`/api/colleges?q=${encodeURIComponent(slotSearch)}&limit=5`);
+        if (res.ok) {
+          const json = await res.json();
+          const filtered = (json.data || []).filter(
+            (item: CollegeListItem) => !colleges.some((c) => c.id === item.id)
+          );
+          setSlotResults(filtered);
+        }
+      } catch (e) {
+        console.error("Failed to search colleges for slot", e);
+      } finally {
+        setSlotSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [slotSearch, colleges]);
 
   if (!colleges || colleges.length === 0) {
     return (
@@ -183,7 +232,7 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                 Feature Parameter
               </th>
               {colleges.map((college) => (
-                <th key={college.id} className="p-4 text-center align-top relative border-l border-slate-200">
+                <th key={college.id} className="p-4 text-center align-top relative border-l border-slate-200 min-w-[200px]">
                   {onRemove && (
                     <button
                       onClick={() => onRemove(college.id)}
@@ -224,6 +273,87 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   </div>
                 </th>
               ))}
+
+              {colleges.length < 3 && onAdd && (
+                <th className="p-4 text-center align-top relative border-l border-dashed border-slate-300 bg-slate-50/40 w-64 min-w-[220px]">
+                  {!showSearchSlot ? (
+                    <div
+                      onClick={() => setShowSearchSlot(true)}
+                      className="flex flex-col items-center justify-center p-5 border-2 border-dashed border-slate-300 hover:border-blue-400 bg-white rounded-xl transition cursor-pointer group shadow-2xs hover:shadow-xs min-h-[140px]"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-blue-50 group-hover:bg-blue-600 text-blue-600 group-hover:text-white flex items-center justify-center mb-2 transition-all">
+                        <Plus className="h-5 w-5" />
+                      </div>
+                      <span className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition">
+                        + Add College Slot
+                      </span>
+                      <span className="text-[11px] text-slate-400 mt-0.5">
+                        ({3 - colleges.length} slot{3 - colleges.length > 1 ? "s" : ""} open)
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="relative p-3 border-2 border-blue-200 rounded-xl bg-white shadow-sm text-left">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                          Search College
+                        </span>
+                        <button
+                          onClick={() => {
+                            setShowSearchSlot(false);
+                            setSlotSearch("");
+                            setSlotResults([]);
+                          }}
+                          className="text-slate-400 hover:text-slate-600 p-0.5"
+                          title="Cancel"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder="e.g. BITS, IIT, NIT..."
+                          value={slotSearch}
+                          onChange={(e) => setSlotSearch(e.target.value)}
+                          autoFocus
+                          className="h-8 text-xs pr-7"
+                        />
+                        {slotSearching && (
+                          <Loader2 className="absolute right-2 top-2 h-4 w-4 text-blue-500 animate-spin" />
+                        )}
+                      </div>
+
+                      {slotResults.length > 0 && (
+                        <div className="absolute left-0 right-0 top-full mt-1.5 z-30 rounded-lg border border-slate-200 bg-white shadow-lg overflow-hidden divide-y divide-slate-100 max-h-48 overflow-y-auto">
+                          {slotResults.map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => {
+                                onAdd(item);
+                                setShowSearchSlot(false);
+                                setSlotSearch("");
+                                setSlotResults([]);
+                              }}
+                              className="w-full p-2.5 text-left hover:bg-blue-50 transition flex items-center justify-between group"
+                            >
+                              <div className="min-w-0 pr-2">
+                                <div className="text-xs font-bold text-slate-900 truncate group-hover:text-blue-700">
+                                  {item.name}
+                                </div>
+                                <div className="text-[10px] text-slate-500 truncate">
+                                  {item.location}, {item.state}
+                                </div>
+                              </div>
+                              <Plus className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </th>
+              )}
             </tr>
           </thead>
 
@@ -247,6 +377,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   )}
                 </td>
               ))}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Annual Tuition Fees */}
@@ -264,6 +399,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   )}
                 </td>
               ))}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Student Rating */}
@@ -280,6 +420,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   )}
                 </td>
               ))}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Average Placement CTC */}
@@ -306,6 +451,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   </td>
                 );
               })}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Highest Placement CTC */}
@@ -319,6 +469,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   </td>
                 );
               })}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Placement Rate % */}
@@ -332,6 +487,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   </td>
                 );
               })}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* 4-Year ROI Multiple */}
@@ -373,6 +533,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   </td>
                 );
               })}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Top Recruiters */}
@@ -393,6 +558,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   </td>
                 );
               })}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Ownership Type */}
@@ -403,6 +573,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   {c.type === "PUBLIC" ? "Government / Public" : c.type === "PRIVATE" ? "Private University" : "Deemed University"}
                 </td>
               ))}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Established Year */}
@@ -413,6 +588,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   {c.establishedYear}
                 </td>
               ))}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Entrance Exams Accepted */}
@@ -439,6 +619,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   </td>
                 );
               })}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Campus Facilities */}
@@ -463,6 +648,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   </td>
                 );
               })}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Approvals */}
@@ -482,6 +672,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   </td>
                 );
               })}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
 
             {/* Admission Probability Shortcut Row */}
@@ -512,6 +707,11 @@ export function CompareTable({ colleges, onRemove }: CompareTableProps) {
                   </td>
                 );
               })}
+              {colleges.length < 3 && onAdd && (
+                <td className="p-4 text-center border-l border-dashed border-slate-200 bg-slate-50/20 text-slate-300 text-xs select-none">
+                  —
+                </td>
+              )}
             </tr>
           </tbody>
         </table>

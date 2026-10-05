@@ -353,7 +353,11 @@ function ComparePageContent() {
       {loading ? (
         <div className="p-12 text-center text-gray-500 font-medium">Loading comparison data...</div>
       ) : (
-        <CompareTable colleges={colleges} onRemove={handleRemoveCollege} />
+        <CompareTable
+          colleges={colleges}
+          onRemove={handleRemoveCollege}
+          onAdd={handleAddCollege}
+        />
       )}
 
       {/* Popular Comparison Matchups */}
