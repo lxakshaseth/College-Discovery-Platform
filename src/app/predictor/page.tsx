@@ -69,6 +69,7 @@ function PredictorContent() {
   const [results, setResults] = useState<MatchedCollege[] | null>(null);
   const [tierFilter, setTierFilter] = useState<"ALL" | "HIGH" | "MEDIUM" | "LOW">("ALL");
   const [resultSearchQuery, setResultSearchQuery] = useState("");
+  const [resultSortBy, setResultSortBy] = useState<"relevance" | "fees_asc" | "ctc_desc" | "rating_desc" | "nirf_asc" | "roi_desc">("relevance");
 
   useEffect(() => {
     const qExam = searchParams.get("exam");
@@ -123,14 +124,45 @@ function PredictorContent() {
     }
   };
 
-  const filteredResults = results?.filter((c) => {
-    const matchesTier = tierFilter === "ALL" || c.matchDetails.admissionChance === tierFilter;
-    const matchesSearch = !resultSearchQuery.trim() ||
-      c.name.toLowerCase().includes(resultSearchQuery.toLowerCase()) ||
-      c.location.toLowerCase().includes(resultSearchQuery.toLowerCase()) ||
-      c.state.toLowerCase().includes(resultSearchQuery.toLowerCase());
-    return matchesTier && matchesSearch;
-  });
+  const filteredResults = results
+    ? [...results]
+        .filter((c) => {
+          const matchesTier = tierFilter === "ALL" || c.matchDetails.admissionChance === tierFilter;
+          const matchesSearch =
+            !resultSearchQuery.trim() ||
+            c.name.toLowerCase().includes(resultSearchQuery.toLowerCase()) ||
+            c.location.toLowerCase().includes(resultSearchQuery.toLowerCase()) ||
+            c.state.toLowerCase().includes(resultSearchQuery.toLowerCase());
+          return matchesTier && matchesSearch;
+        })
+        .sort((a, b) => {
+          if (resultSortBy === "fees_asc") {
+            return (a.minFees || 0) - (b.minFees || 0);
+          }
+          if (resultSortBy === "ctc_desc") {
+            const aCtc = a.placements[0]?.averagePackage || 0;
+            const bCtc = b.placements[0]?.averagePackage || 0;
+            return bCtc - aCtc;
+          }
+          if (resultSortBy === "rating_desc") {
+            return b.rating - a.rating;
+          }
+          if (resultSortBy === "nirf_asc") {
+            const aRank = a.ranking || 9999;
+            const bRank = b.ranking || 9999;
+            return aRank - bRank;
+          }
+          if (resultSortBy === "roi_desc") {
+            const getRoi = (item: MatchedCollege) => {
+              const cost = (item.minFees || 0) * 4;
+              const salary = (item.placements[0]?.averagePackage || 0) * 100000;
+              return cost > 0 ? salary / cost : 0;
+            };
+            return getRoi(b) - getRoi(a);
+          }
+          return 0; // Default relevance
+        })
+    : null;
 
   const highChanceCount = results?.filter((c) => c.matchDetails.admissionChance === "HIGH").length || 0;
   const mediumChanceCount = results?.filter((c) => c.matchDetails.admissionChance === "MEDIUM").length || 0;
@@ -526,8 +558,28 @@ function PredictorContent() {
                   placeholder="Filter colleges, city, state..."
                   value={resultSearchQuery}
                   onChange={(e) => setResultSearchQuery(e.target.value)}
-                  className="h-9 pl-8 text-xs bg-white border-slate-200 w-48 sm:w-56"
+                  className="h-9 pl-8 text-xs bg-white border-slate-200 w-44 sm:w-48"
                 />
+              </div>
+
+              {/* In-results Sort Selector */}
+              <div className="w-36 sm:w-44">
+                <Select
+                  value={resultSortBy}
+                  onValueChange={(val: any) => setResultSortBy(val)}
+                >
+                  <SelectTrigger className="h-9 text-xs bg-white border-slate-200">
+                    <SelectValue placeholder="Sort matches" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="relevance">Sort: Relevance</SelectItem>
+                    <SelectItem value="ctc_desc">Highest Avg CTC</SelectItem>
+                    <SelectItem value="fees_asc">Lowest Tuition Fee</SelectItem>
+                    <SelectItem value="nirf_asc">Top NIRF Rank</SelectItem>
+                    <SelectItem value="rating_desc">Highest Rating</SelectItem>
+                    <SelectItem value="roi_desc">Highest ROI Multiple</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <Button
