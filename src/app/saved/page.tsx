@@ -17,7 +17,8 @@ export default function SavedPage() {
   const [savedColleges, setSavedColleges] = useState<SavedCollegeWithCollege[]>([]);
   const [savedComparisons, setSavedComparisons] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [wishlistSort, setWishlistSort] = useState<"recent" | "ranking" | "fees" | "rating">("recent");
+  const [typeFilter, setTypeFilter] = useState<"ALL" | "PUBLIC" | "PRIVATE">("ALL");
+  const [wishlistSort, setWishlistSort] = useState<"recent" | "ranking" | "fees" | "fees_desc" | "ctc" | "rating" | "established">("recent");
   const [copiedComparisonId, setCopiedComparisonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [clearingWishlist, setClearingWishlist] = useState(false);
@@ -96,6 +97,12 @@ export default function SavedPage() {
   };
 
   const filteredSavedColleges = savedColleges.filter((item) => {
+    if (typeFilter === "PUBLIC" && item.college.type !== "PUBLIC") {
+      return false;
+    }
+    if (typeFilter === "PRIVATE" && item.college.type !== "PRIVATE" && item.college.type !== "DEEMED") {
+      return false;
+    }
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -114,8 +121,19 @@ export default function SavedPage() {
     if (wishlistSort === "fees") {
       return (a.college.minFees || 0) - (b.college.minFees || 0);
     }
+    if (wishlistSort === "fees_desc") {
+      return (b.college.minFees || 0) - (a.college.minFees || 0);
+    }
+    if (wishlistSort === "ctc") {
+      const ctcA = (a.college as any).placements?.[0]?.averagePackage || 0;
+      const ctcB = (b.college as any).placements?.[0]?.averagePackage || 0;
+      return ctcB - ctcA;
+    }
     if (wishlistSort === "rating") {
       return (b.college.rating || 0) - (a.college.rating || 0);
+    }
+    if (wishlistSort === "established") {
+      return (a.college.establishedYear || 9999) - (b.college.establishedYear || 9999);
     }
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
@@ -284,74 +302,107 @@ export default function SavedPage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-3 rounded-xl border border-gray-200">
-                <input
-                  type="text"
-                  placeholder="Filter saved colleges by name or city..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:w-72 px-3 py-1.5 text-sm rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <input
+                      type="text"
+                      placeholder="Filter saved colleges by name or city..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full sm:w-64 px-3 py-1.5 text-xs rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 h-9"
+                    />
 
-                <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
-                  {/* Compare Shortlisted Button */}
-                  {savedColleges.length >= 2 && (
-                    <Link
-                      href={`/compare?ids=${savedColleges
-                        .slice(0, 3)
-                        .map((s) => s.collegeId)
-                        .join(",")}`}
-                    >
-                      <Button
-                        size="sm"
-                        className="text-xs font-semibold gap-1.5 bg-blue-600 hover:bg-blue-700 text-white shrink-0 h-9 shadow-xs"
-                        title="Launch side-by-side comparison with your shortlisted colleges"
+                    {/* Quick Type Filter Pills */}
+                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs font-semibold shrink-0">
+                      <button
+                        onClick={() => setTypeFilter("ALL")}
+                        className={`px-2 py-1 rounded-md transition ${
+                          typeFilter === "ALL" ? "bg-white text-blue-700 shadow-2xs font-bold" : "text-slate-600 hover:text-slate-900"
+                        }`}
                       >
-                        <Scale className="h-3.5 w-3.5" />
-                        <span>Compare Shortlisted ({Math.min(3, savedColleges.length)})</span>
-                      </Button>
-                    </Link>
-                  )}
+                        All ({savedColleges.length})
+                      </button>
+                      <button
+                        onClick={() => setTypeFilter("PUBLIC")}
+                        className={`px-2 py-1 rounded-md transition ${
+                          typeFilter === "PUBLIC" ? "bg-white text-blue-700 shadow-2xs font-bold" : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        Govt ({savedColleges.filter((c) => c.college.type === "PUBLIC").length})
+                      </button>
+                      <button
+                        onClick={() => setTypeFilter("PRIVATE")}
+                        className={`px-2 py-1 rounded-md transition ${
+                          typeFilter === "PRIVATE" ? "bg-white text-blue-700 shadow-2xs font-bold" : "text-slate-600 hover:text-slate-900"
+                        }`}
+                      >
+                        Private ({savedColleges.filter((c) => c.college.type !== "PUBLIC").length})
+                      </button>
+                    </div>
+                  </div>
 
-                  {/* Sort Wishlist Selector */}
-                  <Select
-                    value={wishlistSort}
-                    onValueChange={(val: any) => setWishlistSort(val)}
-                  >
-                    <SelectTrigger className="h-9 w-44 text-xs bg-white border-gray-200">
-                      <SelectValue placeholder="Sort wishlist" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recent">Recently Shortlisted</SelectItem>
-                      <SelectItem value="ranking">NIRF Rank (Top First)</SelectItem>
-                      <SelectItem value="fees">Lowest Tuition Fees</SelectItem>
-                      <SelectItem value="rating">Highest Rating</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                    {/* Compare Shortlisted Button */}
+                    {savedColleges.length >= 2 && (
+                      <Link
+                        href={`/compare?ids=${savedColleges
+                          .slice(0, 3)
+                          .map((s) => s.collegeId)
+                          .join(",")}`}
+                      >
+                        <Button
+                          size="sm"
+                          className="text-xs font-semibold gap-1.5 bg-blue-600 hover:bg-blue-700 text-white shrink-0 h-9 shadow-xs"
+                          title="Launch side-by-side comparison with your shortlisted colleges"
+                        >
+                          <Scale className="h-3.5 w-3.5" />
+                          <span>Compare ({Math.min(3, savedColleges.length)})</span>
+                        </Button>
+                      </Link>
+                    )}
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={exportWishlistCSV}
-                    className="text-xs font-semibold gap-1.5 border-gray-200 text-gray-700 hover:bg-gray-50 shrink-0 h-9"
-                    title="Export your shortlisted colleges as CSV spreadsheet"
-                  >
-                    <Download className="h-3.5 w-3.5 text-gray-500" />
-                    <span>Export Wishlist</span>
-                  </Button>
+                    {/* Sort Wishlist Selector */}
+                    <Select
+                      value={wishlistSort}
+                      onValueChange={(val: any) => setWishlistSort(val)}
+                    >
+                      <SelectTrigger className="h-9 w-44 text-xs bg-white border-gray-200">
+                        <SelectValue placeholder="Sort wishlist" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="recent">Recently Shortlisted</SelectItem>
+                        <SelectItem value="ranking">Top NIRF Rank</SelectItem>
+                        <SelectItem value="ctc">Highest Avg CTC</SelectItem>
+                        <SelectItem value="fees">Lowest Tuition Fees</SelectItem>
+                        <SelectItem value="fees_desc">Highest Tuition Fees</SelectItem>
+                        <SelectItem value="rating">Highest Rating</SelectItem>
+                        <SelectItem value="established">Oldest Heritage</SelectItem>
+                      </SelectContent>
+                    </Select>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleClearWishlist}
-                    disabled={clearingWishlist}
-                    className="text-xs font-semibold gap-1.5 border-rose-200 text-rose-700 hover:bg-rose-50 shrink-0 h-9"
-                    title="Clear all saved colleges from your wishlist"
-                  >
-                    <Trash2 className="h-3.5 w-3.5 text-rose-500" />
-                    <span>{clearingWishlist ? "Clearing..." : "Clear All"}</span>
-                  </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={exportWishlistCSV}
+                      className="text-xs font-semibold gap-1.5 border-gray-200 text-gray-700 hover:bg-gray-50 shrink-0 h-9"
+                      title="Export your shortlisted colleges as CSV spreadsheet"
+                    >
+                      <Download className="h-3.5 w-3.5 text-gray-500" />
+                      <span className="hidden sm:inline">Export</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleClearWishlist}
+                      disabled={clearingWishlist}
+                      className="text-xs font-semibold gap-1.5 border-rose-200 text-rose-700 hover:bg-rose-50 shrink-0 h-9"
+                      title="Clear all saved colleges from your wishlist"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+                      <span>{clearingWishlist ? "Clearing..." : "Clear All"}</span>
+                    </Button>
+                  </div>
                 </div>
-              </div>
               </>
             )}
 
